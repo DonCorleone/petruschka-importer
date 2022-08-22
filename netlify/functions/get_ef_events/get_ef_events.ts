@@ -44,7 +44,9 @@ async function getEvents(): Promise<EF_Event[]> {
   }
 }
 
-export async function insertEventIntoDb(dbEvents: EF_Event[]): Promise<unknown> {
+export async function insertEventIntoDb(
+  efEvents: EF_Event[]
+): Promise<unknown> {
   const uri = process.env.MONGODB_URI;
   const db = process.env.MONGODB_COLLECTION;
 
@@ -54,19 +56,27 @@ export async function insertEventIntoDb(dbEvents: EF_Event[]): Promise<unknown> 
 
     const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
     const collectionName = process.env.MONGODB_COLLECTION;
-    if (collectionName){
-      const collection = database.collection(collectionName);
-      const results = await collection.insertMany(dbEvents);
+    if (collectionName) {
+      const collection = database.collection<EF_Event>(collectionName);
+
+      let updateCounter = 0;
+      efEvents.forEach((efEvent) => {
+        const result = collection.updateOne(
+          { id: efEvent.id },
+          { $set: { ...efEvent } },
+          { upsert: true }
+        );
+        result.then((x) => (updateCounter += x.matchedCount));
+      });
       return {
         statusCode: 200,
-        body: JSON.stringify(results.insertedCount.toString()),
+        body: JSON.stringify(updateCounter.toString()),
       };
-    }else {
-      return { statusCode: 500, body: 'no collectionName - env'}
+    } else {
+      return { statusCode: 500, body: "no collectionName - env" };
     }
-
-  }else{
-    return { statusCode: 500, body: 'no uri or db - env'};
+  } else {
+    return { statusCode: 500, body: "no uri or db - env" };
   }
 }
 
