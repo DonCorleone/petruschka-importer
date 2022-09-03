@@ -25,7 +25,7 @@ async function getEvents(): Promise<EF_Event[]> {
 
     var myHeaders: HeadersInit = {
       Authorization: auth,
-      Cookie: cookie
+      Cookie: cookie,
     };
 
     const resp = await fetch(API_URI, {
@@ -72,7 +72,9 @@ export async function insertEventIntoDb(
           { $set: { ...efEvent } },
           { upsert: true }
         );
-        result.then((x) => (updateCounter += x.matchedCount));
+        result
+          .then((updateResult) => (updateCounter += updateResult.matchedCount))
+          .catch((reason) => console.log(reason));
       });
       return {
         statusCode: 200,
