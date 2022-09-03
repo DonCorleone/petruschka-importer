@@ -36,15 +36,15 @@ const handler = async (event: HandlerEvent) => {
       From: process.env.POSTMARK_DOMAIN ?? '',
       To: decodeURI(context.destination),
       Subject: 'Test',
-      TextBody: 'Hello from Postmark!',
-      Attachments: [
-        {
-          Name: `report-${new Date().toDateString()}.pdf`,
-          Content: report.toString('base64'),
-          ContentType: 'application/pdf',
-          ContentID: 'cid:report.pdf'
-        }
-      ]
+      TextBody: 'Hello from Postmark!'
+      // Attachments: [
+      //   {
+      //     Name: `report-${new Date().toDateString()}.pdf`,
+      //     Content: report.toString('base64'),
+      //     ContentType: 'application/pdf',
+      //     ContentID: 'cid:report.pdf'
+      //   }
+      // ]
     })
     .then((info) => console.log(`PDF report sent: %s`, info.MessageID))
     .catch((ex) => console.log(ex));

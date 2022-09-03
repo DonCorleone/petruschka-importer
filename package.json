@@ -1,5 +1,6 @@
 {
   "scripts": {
+    "netlify": "NODE_OPTIONS=--inspect netlify functions:serve",
     "start:dev": "nodemon",
     "start": "npm run build && node build/index.js",
     "build": "rimraf ./build && tsc",
@@ -18,6 +19,8 @@
     "@typescript-eslint/eslint-plugin": "^5.36.1",
     "@typescript-eslint/parser": "^5.36.1",
     "eslint": "^8.23.0",
+    "eslint-config-prettier": "^8.5.0",
+    "eslint-plugin-prettier": "^4.2.1",
     "netlify-cli": "^11.5.1",
     "nodemon": "^2.0.19",
     "prettier": "^2.7.1",
