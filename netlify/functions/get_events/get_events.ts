@@ -1,6 +1,6 @@
-import { Handler } from "@netlify/functions";
-import { MongoClient } from "mongodb";
-import { Movie } from "./models";
+import { Handler } from '@netlify/functions';
+import { MongoClient } from 'mongodb';
+import { Movie } from './models';
 
 export const handler: Handler = async (event, context) => {
   try {
@@ -16,10 +16,14 @@ export const handler: Handler = async (event, context) => {
       const results = await collection.find({}).limit(20).toArray();
       return {
         statusCode: 200,
-        body: JSON.stringify(results.map(x => {return x.cast})),
+        body: JSON.stringify(
+          results.map((x) => {
+            return x.cast;
+          })
+        )
       };
-    }else{
-      return { statusCode: 500, body: 'no env'};
+    } else {
+      return { statusCode: 500, body: 'no env' };
     }
   } catch (error) {
     return { statusCode: 500, body: error.toString() };

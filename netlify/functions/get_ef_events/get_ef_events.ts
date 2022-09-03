@@ -1,9 +1,9 @@
-import { Handler } from "@netlify/functions";
-import { MongoClient } from "mongodb";
-import fetch from "node-fetch";
+import { Handler } from '@netlify/functions';
+import { MongoClient } from 'mongodb';
+import fetch from 'node-fetch';
 
 const API_URI =
-  "https://eventfrog.ch/api/web/events.modifyInfo.de.json?accessibleForAction=manage_event&distinctGroup=false&temporalState=future&page=1&perPage=50&sortBy=eventBegin&asc=true&state=draft&state=published&selector=organizer";
+  'https://eventfrog.ch/api/web/events.modifyInfo.de.json?accessibleForAction=manage_event&distinctGroup=false&temporalState=future&page=1&perPage=50&sortBy=eventBegin&asc=true&state=draft&state=published&selector=organizer';
 
 export interface EF_Event {
   id: string;
@@ -20,18 +20,18 @@ async function getEvents(): Promise<EF_Event[]> {
     const cookie = process.env.EF_COOKIE;
 
     if (!auth || !cookie) {
-      throw new Error("no auth");
+      throw new Error('no auth');
     }
 
-    var myHeaders: HeadersInit = {
+    const myHeaders: HeadersInit = {
       Authorization: auth,
-      Cookie: cookie,
+      Cookie: cookie
     };
 
     const resp = await fetch(API_URI, {
-      method: "GET",
+      method: 'GET',
       headers: myHeaders,
-      redirect: "follow",
+      redirect: 'follow'
     });
 
     const response = (await resp.json()) as EF_Event_Response;
@@ -41,12 +41,12 @@ async function getEvents(): Promise<EF_Event[]> {
     const monsterList = list as EF_Event[];
 
     if (!monsterList || !monsterList.length) {
-      throw new Error("no monsters");
+      throw new Error('no monsters');
     }
 
     return monsterList;
   } catch (err) {
-    throw new Error("froggy not found " + err);
+    throw new Error('froggy not found ' + err);
   }
 }
 
@@ -78,13 +78,13 @@ export async function insertEventIntoDb(
       });
       return {
         statusCode: 200,
-        body: JSON.stringify(efEvents),
+        body: JSON.stringify(efEvents)
       };
     } else {
-      return { statusCode: 500, body: "no collectionName - env" };
+      return { statusCode: 500, body: 'no collectionName - env' };
     }
   } else {
-    return { statusCode: 500, body: "no uri or db - env" };
+    return { statusCode: 500, body: 'no uri or db - env' };
   }
 }
 
@@ -95,19 +95,19 @@ export const handler: Handler = async (event, context) => {
     return {
       statusCode: 200,
       headers: {
-        "Content-Type": "application/json",
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(result),
+      body: JSON.stringify(result)
     };
   } catch (err) {
     return {
       statusCode: 500,
       headers: {
-        "Content-Type": "application.json",
+        'Content-Type': 'application.json'
       },
       body: JSON.stringify({
-        message: err.message,
-      }),
+        message: err.message
+      })
     };
   }
 };

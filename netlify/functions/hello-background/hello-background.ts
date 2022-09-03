@@ -1,6 +1,6 @@
-import * as postmark from "postmark";
-import { jsPDF } from "jspdf";
-import { HandlerEvent } from "@netlify/functions";
+import * as postmark from 'postmark';
+import { jsPDF } from 'jspdf';
+import { HandlerEvent } from '@netlify/functions';
 
 type Context = {
   content: string;
@@ -13,14 +13,14 @@ const handler = async (event: HandlerEvent) => {
   }
 
   const context: Context = {
-    content: event.queryStringParameters["content"] ?? "",
-    destination: event.queryStringParameters["destination"] ?? "",
+    content: event.queryStringParameters['content'] ?? '',
+    destination: event.queryStringParameters['destination'] ?? ''
   };
 
   console.log(`Sending PDF report to ${context.destination}`);
 
   const report = Buffer.from(
-    new jsPDF().text(decodeURI(context.content), 10, 10).output("arraybuffer")
+    new jsPDF().text(decodeURI(context.content), 10, 10).output('arraybuffer')
   );
 
   const serverToken = process.env.POSTMARK_API;
@@ -33,18 +33,18 @@ const handler = async (event: HandlerEvent) => {
 
   client
     .sendEmail({
-      From: process.env.POSTMARK_DOMAIN ?? "",
+      From: process.env.POSTMARK_DOMAIN ?? '',
       To: decodeURI(context.destination),
-      Subject: "Test",
-      TextBody: "Hello from Postmark!",
+      Subject: 'Test',
+      TextBody: 'Hello from Postmark!',
       Attachments: [
         {
           Name: `report-${new Date().toDateString()}.pdf`,
-          Content: report.toString("base64"),
-          ContentType: "application/pdf",
-          ContentID: "cid:report.pdf",
-        },
-      ],
+          Content: report.toString('base64'),
+          ContentType: 'application/pdf',
+          ContentID: 'cid:report.pdf'
+        }
+      ]
     })
     .then((info) => console.log(`PDF report sent: %s`, info.MessageID))
     .catch((ex) => console.log(ex));
