@@ -70,20 +70,13 @@ async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
 
   const collection = database.collection<EF_Event>(collectionName);
 
-  return efEvents.forEach((efEvent) => {
-    const result = collection.updateOne(
-      { id: efEvent.id },
-      { $set: { ...efEvent } },
-      { upsert: true }
-    );
-    result
-      .then((updateResult) => {
-        return JSON.stringify(updateResult);
-      })
-      .catch((reason) => {
-        throw new Error('reason ' + JSON.stringify(reason));
-      });
+  let result = '';
+  efEvents.forEach((efEvent) => {
+    collection
+      .updateOne({ id: efEvent.id }, { $set: { ...efEvent } }, { upsert: true })
+      .then((updateRes) => (result = result + ' OK'));
   });
+  return result;
 }
 
 export async function handler() {
