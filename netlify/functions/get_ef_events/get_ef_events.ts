@@ -81,7 +81,7 @@ async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
         return updateResult;
       })
       .catch((reason) => {
-        throw new Error('no collectionName - env');
+        throw new Error('reason ' + reason);
       });
   });
 }
