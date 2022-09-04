@@ -54,36 +54,36 @@ async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
   const uri = process.env.MONGODB_URI;
   const db = process.env.MONGODB_COLLECTION;
 
-  if (uri && db) {
-    const mongoClient = new MongoClient(uri);
-    const clientPromise = mongoClient.connect();
-
-    const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
-    const collectionName = process.env.MONGODB_COLLECTION;
-    if (collectionName) {
-      const collection = database.collection<EF_Event>(collectionName);
-
-      let updateCounter = 0;
-      efEvents.forEach((efEvent) => {
-        const result = collection.updateOne(
-          { id: efEvent.id },
-          { $set: { ...efEvent } },
-          { upsert: true }
-        );
-        result
-          .then((updateResult) => (updateCounter += updateResult.matchedCount))
-          .catch((reason) => console.log(reason));
-      });
-      return {
-        statusCode: 200,
-        body: JSON.stringify(efEvents)
-      };
-    } else {
-      return { statusCode: 500, body: 'no collectionName - env' };
-    }
-  } else {
-    return { statusCode: 500, body: 'no uri or db - env' };
+  if (!(uri && db)) {
+    throw new Error('no uri or db - env');
   }
+
+  const mongoClient = new MongoClient(uri);
+  const clientPromise = mongoClient.connect();
+
+  const database = (await clientPromise).db(process.env.MONGODB_DATABASE);
+  const collectionName = process.env.MONGODB_COLLECTION;
+
+  if (!collectionName) {
+    throw new Error('no collectionName - env');
+  }
+
+  const collection = database.collection<EF_Event>(collectionName);
+
+  return efEvents.forEach((efEvent) => {
+    const result = collection.updateOne(
+      { id: efEvent.id },
+      { $set: { ...efEvent } },
+      { upsert: true }
+    );
+    result
+      .then((updateResult) => {
+        return updateResult;
+      })
+      .catch((reason) => {
+        throw new Error('no collectionName - env');
+      });
+  });
 }
 
 export async function handler() {
