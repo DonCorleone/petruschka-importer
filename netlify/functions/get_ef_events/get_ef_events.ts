@@ -52,6 +52,8 @@ async function getEvents(): Promise<EF_Event[]> {
 }
 
 async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
+  console.log('Here i am.');
+
   const uri = process.env.MONGODB_URI;
   const db = process.env.MONGODB_COLLECTION;
 
