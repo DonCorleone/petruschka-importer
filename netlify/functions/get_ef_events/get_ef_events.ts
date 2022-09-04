@@ -78,10 +78,10 @@ async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
     );
     result
       .then((updateResult) => {
-        return updateResult;
+        return JSON.stringify(updateResult);
       })
       .catch((reason) => {
-        throw new Error('reason ' + reason);
+        throw new Error('reason ' + JSON.stringify(reason));
       });
   });
 }
