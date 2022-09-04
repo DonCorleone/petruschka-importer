@@ -17,9 +17,8 @@ export interface EF_Event_Response {
 async function getEvents(): Promise<EF_Event[]> {
   try {
     var myHeaders: HeadersInit = {
-      Authorization:
-        "Basic dml0b2Nvcmxlb25lNzdAZ21haWwuY29tOnJlcWppOS14ZXF6b2otcGlKZ2Vu",
-      Cookie: "JSESSIONID=D869EEE6813F51AAEC5874EBC0295947",
+      Authorization: "Basic R9TMVACYNCHINF1NAKX8V8ZLW4SND4HP",
+      Cookie: "JSESSIONID=95F813CB498B197A3E9BE2FD6FA81D60",
     };
 
     const resp = await fetch(API_URI, {
@@ -70,7 +69,7 @@ export async function insertEventIntoDb(
       });
       return {
         statusCode: 200,
-        body: JSON.stringify(updateCounter.toString()),
+        body: JSON.stringify(efEvents),
       };
     } else {
       return { statusCode: 500, body: "no collectionName - env" };
