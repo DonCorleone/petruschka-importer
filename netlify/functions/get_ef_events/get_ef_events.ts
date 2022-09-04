@@ -1,5 +1,5 @@
 import { Handler } from '@netlify/functions';
-import { MongoClient } from 'mongodb';
+import { MongoClient, UpdateResult } from 'mongodb';
 import fetch from 'node-fetch';
 
 const API_URI =
@@ -70,13 +70,18 @@ async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
 
   const collection = database.collection<EF_Event>(collectionName);
 
-  let result = '';
+  const asyncFunctions: Promise<UpdateResult>[] = [];
   efEvents.forEach((efEvent) => {
-    collection
-      .updateOne({ id: efEvent.id }, { $set: { ...efEvent } }, { upsert: true })
-      .then((updateRes) => (result = result + ' OK'));
+    asyncFunctions.push(
+      collection.updateOne(
+        { id: efEvent.id },
+        { $set: { ...efEvent } },
+        { upsert: true }
+      )
+    );
   });
-  return result;
+
+  return await Promise.all(asyncFunctions);
 }
 
 export async function handler() {
