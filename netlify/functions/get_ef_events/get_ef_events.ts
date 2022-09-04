@@ -5,12 +5,12 @@ import fetch from 'node-fetch';
 const API_URI =
   'https://eventfrog.ch/api/web/events.modifyInfo.de.json?accessibleForAction=manage_event&distinctGroup=false&temporalState=future&page=1&perPage=50&sortBy=eventBegin&asc=true&state=draft&state=published&selector=organizer';
 
-export interface EF_Event {
+interface EF_Event {
   id: string;
   modifyDate?: Date;
 }
 
-export interface EF_Event_Response {
+interface EF_Event_Response {
   events: EF_Event[];
 }
 
@@ -50,9 +50,7 @@ async function getEvents(): Promise<EF_Event[]> {
   }
 }
 
-export async function insertEventIntoDb(
-  efEvents: EF_Event[]
-): Promise<unknown> {
+async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
   const uri = process.env.MONGODB_URI;
   const db = process.env.MONGODB_COLLECTION;
 
@@ -91,13 +89,13 @@ export async function insertEventIntoDb(
 export async function handler() {
   try {
     const data = await getEvents();
-    //  const result = await insertEventIntoDb(data);
+    const result = await insertEventIntoDb(data);
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify(data)
+      body: JSON.stringify(result)
     };
   } catch (err) {
     return {
