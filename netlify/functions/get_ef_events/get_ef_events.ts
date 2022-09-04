@@ -91,13 +91,13 @@ export async function insertEventIntoDb(
 export async function handler() {
   try {
     const data = await getEvents();
-    //  const result = await insertEventIntoDb(data);
+    const result = await insertEventIntoDb(data);
     return {
       statusCode: 200,
       headers: {
         'Content-Type': 'application/json'
       },
-      body: JSON.stringify('done main')
+      body: JSON.stringify(result)
     };
   } catch (err) {
     return {
