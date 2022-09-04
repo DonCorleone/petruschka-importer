@@ -79,7 +79,7 @@ export async function insertEventIntoDb(
   }
 }
 
-export const handler: Handler = async (event, context) => {
+export async function handler() {
   try {
     const data = await getEvents();
     const result = await insertEventIntoDb(data);
@@ -101,4 +101,4 @@ export const handler: Handler = async (event, context) => {
       }),
     };
   }
-};
+}
