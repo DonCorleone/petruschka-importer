@@ -7,20 +7,20 @@ type Context = {
   destination: string;
 };
 
-const handler = async (event: HandlerEvent) => {
+export async function handler(event, context) {
   if (!event.queryStringParameters) {
     return;
   }
 
-  const context: Context = {
+  const ctx: Context = {
     content: event.queryStringParameters['content'] ?? '',
     destination: event.queryStringParameters['destination'] ?? ''
   };
 
-  console.log(`Sending PDF report to ${context.destination}`);
+  console.log(`Sending PDF report to ${ctx.destination}`);
 
   const report = Buffer.from(
-    new jsPDF().text(decodeURI(context.content), 10, 10).output('arraybuffer')
+    new jsPDF().text(decodeURI(ctx.content), 10, 10).output('arraybuffer')
   );
 
   const serverToken = process.env.POSTMARK_API;
@@ -34,7 +34,7 @@ const handler = async (event: HandlerEvent) => {
   client
     .sendEmail({
       From: process.env.POSTMARK_DOMAIN ?? '',
-      To: decodeURI(context.destination),
+      To: decodeURI(ctx.destination),
       Subject: 'Test',
       TextBody: 'Hello from Postmark!'
       // Attachments: [
@@ -48,6 +48,4 @@ const handler = async (event: HandlerEvent) => {
     })
     .then((info) => console.log(`PDF report sent: %s`, info.MessageID))
     .catch((ex) => console.log(ex));
-};
-
-export { handler };
+}
