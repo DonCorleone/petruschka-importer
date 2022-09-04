@@ -1,2 +1,2 @@
 [functions]
-external_node_modules = ["mongodb", "node-fetch"]
+external_node_modules = ["mongodb"]
