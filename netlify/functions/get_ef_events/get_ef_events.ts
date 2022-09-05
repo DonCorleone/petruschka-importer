@@ -1,10 +1,6 @@
-import { Handler, HandlerResponse } from '@netlify/functions';
-import { Console } from 'console';
+import { HandlerResponse } from '@netlify/functions';
 import { MongoClient, UpdateResult } from 'mongodb';
 import fetch from 'node-fetch';
-
-const API_URI =
-  'https://eventfrog.ch/api/web/events.modifyInfo.de.json?accessibleForAction=manage_event&distinctGroup=false&temporalState=future&page=1&perPage=50&sortBy=eventBegin&asc=true&state=draft&state=published&selector=organizer';
 
 interface EF_Event {
   id: string;
@@ -19,9 +15,10 @@ async function getEvents(): Promise<EF_Event[]> {
   try {
     const auth = process.env.EF_AUTH;
     const cookie = process.env.EF_COOKIE;
+    const uriOverview = process.env.EF_URL_OVERVIEW;
 
-    if (!auth || !cookie) {
-      throw new Error('no auth');
+    if (!auth || !cookie || !uriOverview) {
+      throw new Error('no ef uri or no auth');
     }
 
     const myHeaders: HeadersInit = {
@@ -29,7 +26,7 @@ async function getEvents(): Promise<EF_Event[]> {
       Cookie: cookie
     };
 
-    const resp = await fetch(API_URI, {
+    const resp = await fetch(uriOverview, {
       method: 'GET',
       headers: myHeaders,
       redirect: 'follow'
@@ -39,15 +36,15 @@ async function getEvents(): Promise<EF_Event[]> {
 
     const list: EF_Event[] | unknown = response.events;
 
-    const monsterList = list as EF_Event[];
+    const efEvents = list as EF_Event[];
 
-    if (!monsterList || !monsterList.length) {
-      throw new Error('no monsters');
+    if (!efEvents || !efEvents.length) {
+      throw new Error('no Events found on EF');
     }
 
-    return monsterList;
+    return efEvents;
   } catch (err) {
-    throw new Error('froggy not found ' + err);
+    throw new Error('Error ' + err);
   }
 }
 
@@ -58,7 +55,7 @@ async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
   const db = process.env.MONGODB_COLLECTION;
 
   if (!(uri && db)) {
-    throw new Error('no uri or db - env');
+    throw new Error('no mongo uri or db - env');
   }
 
   const mongoClient = new MongoClient(uri);
