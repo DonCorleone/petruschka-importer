@@ -1,4 +1,4 @@
-import { Handler } from '@netlify/functions';
+import { Handler, HandlerResponse } from '@netlify/functions';
 import { Console } from 'console';
 import { MongoClient, UpdateResult } from 'mongodb';
 import fetch from 'node-fetch';
@@ -90,7 +90,7 @@ async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
   return await Promise.all(asyncFunctions);
 }
 
-export async function handler() {
+export async function handler(): Promise<HandlerResponse> {
   try {
     const data = await getEvents();
     const result = await insertEventIntoDb(data);
