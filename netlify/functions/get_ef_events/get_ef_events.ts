@@ -1,20 +1,53 @@
 import { HandlerResponse } from '@netlify/functions';
 import { MongoClient, UpdateResult } from 'mongodb';
 import fetch from 'node-fetch';
+import {
+  EF_Event_Detail_Response,
+  EF_Event_Detail
+} from '../models/EF_Event_Detail';
+import {
+  EF_Event_Overview,
+  EF_Event_Overview_Response
+} from '../models/EF_Event_Overview';
 
-const API_URI =
-  'https://eventfrog.ch/api/web/events.modifyInfo.de.json?accessibleForAction=manage_event&distinctGroup=false&temporalState=future&page=1&perPage=50&sortBy=eventBegin&asc=true&state=draft&state=published&selector=organizer';
+async function getEventById(eventId: string) {
+  try {
+    const auth = process.env.EF_AUTH;
+    const cookie = process.env.EF_COOKIE;
+    const uriOverview = process.env.EF_URL_EVENT_BY_ID;
 
-interface EF_Event {
-  id: string;
-  modifyDate?: Date;
+    if (!auth || !cookie || !uriOverview) {
+      throw new Error('no ef uri or no auth');
+    }
+
+    const myHeaders: HeadersInit = {
+      Authorization: auth,
+      Cookie: cookie
+    };
+
+    const resp = await fetch(uriOverview + '&id=' + eventId, {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow'
+    });
+
+    const response = (await resp.json()) as EF_Event_Detail_Response;
+
+    const list: EF_Event_Detail[] | unknown = response.events;
+
+    const efEvents = list as EF_Event_Detail[];
+
+    if (!efEvents || !efEvents.length) {
+      throw new Error('no Events found on EF');
+    }
+
+    return efEvents;
+  } catch (err) {
+    throw new Error('Error ' + err);
+  }
 }
 
-interface EF_Event_Response {
-  events: EF_Event[];
-}
-
-async function getEvents(): Promise<EF_Event[]> {
+async function getEvents(): Promise<EF_Event_Overview[]> {
   try {
     const auth = process.env.EF_AUTH;
     const cookie = process.env.EF_COOKIE;
@@ -35,11 +68,11 @@ async function getEvents(): Promise<EF_Event[]> {
       redirect: 'follow'
     });
 
-    const response = (await resp.json()) as EF_Event_Response;
+    const response = (await resp.json()) as EF_Event_Overview_Response;
 
-    const list: EF_Event[] | unknown = response.events;
+    const list: EF_Event_Overview[] | unknown = response.events;
 
-    const efEvents = list as EF_Event[];
+    const efEvents = list as EF_Event_Overview[];
 
     if (!efEvents || !efEvents.length) {
       throw new Error('no Events found on EF');
@@ -51,7 +84,9 @@ async function getEvents(): Promise<EF_Event[]> {
   }
 }
 
-async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
+async function insertEventIntoDb(
+  efEvents: EF_Event_Overview[]
+): Promise<unknown> {
   console.log('Here i am.');
 
   const uri = process.env.MONGODB_URI;
@@ -71,13 +106,16 @@ async function insertEventIntoDb(efEvents: EF_Event[]): Promise<unknown> {
     throw new Error('no collectionName - env');
   }
 
-  const collection = database.collection<EF_Event>(collectionName);
+  const collection = database.collection<EF_Event_Detail>(collectionName);
 
   console.log('Here i am.');
 
   const asyncFunctions: Promise<UpdateResult>[] = [];
   efEvents.forEach((efEvent) => {
     console.log(JSON.stringify(efEvent));
+
+    getEventById(efEvent.id);
+
     asyncFunctions.push(
       collection.updateOne(
         { id: efEvent.id },
