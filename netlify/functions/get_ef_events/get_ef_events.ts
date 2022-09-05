@@ -2,6 +2,9 @@ import { HandlerResponse } from '@netlify/functions';
 import { MongoClient, UpdateResult } from 'mongodb';
 import fetch from 'node-fetch';
 
+const API_URI =
+  'https://eventfrog.ch/api/web/events.modifyInfo.de.json?accessibleForAction=manage_event&distinctGroup=false&temporalState=future&page=1&perPage=50&sortBy=eventBegin&asc=true&state=draft&state=published&selector=organizer';
+
 interface EF_Event {
   id: string;
   modifyDate?: Date;
