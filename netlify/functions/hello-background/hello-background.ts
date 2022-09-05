@@ -31,7 +31,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
 
   const client = new postmark.ServerClient(serverToken);
 
-  client
+  return client
     .sendEmail({
       From: process.env.POSTMARK_DOMAIN ?? '',
       To: decodeURI(ctx.destination),
