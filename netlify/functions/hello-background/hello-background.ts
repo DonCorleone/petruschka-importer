@@ -36,7 +36,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       From: process.env.POSTMARK_DOMAIN ?? '',
       To: decodeURI(ctx.destination),
       Subject: 'Test',
-      TextBody: 'Hello from Postmark!',
+      TextBody: 'Hello from Linus!',
       Attachments: [
         {
           Name: `report-${new Date().toDateString()}.pdf`,
