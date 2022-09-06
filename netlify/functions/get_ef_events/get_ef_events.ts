@@ -4,11 +4,11 @@ import fetch from 'node-fetch';
 import {
   EF_Event_Detail_Response,
   EF_Event_Detail
-} from '../models/EF_Event_Detail';
+} from '../../models/EF_Event_Detail';
 import {
   EF_Event_Overview,
   EF_Event_Overview_Response
-} from '../models/EF_Event_Overview';
+} from '../../models/EF_Event_Overview';
 
 async function getEventById(eventId: string) {
   try {
