@@ -2,8 +2,18 @@ import { Handler, HandlerContext, HandlerEvent } from '@netlify/functions';
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
-    // const data = await getEvents();
-    // const result = await insertEventIntoDb(data);
+    const sleep = (ms: number) => {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    };
+
+    (async () => {
+      for (let i = 0; i <= 60; i++) {
+        const date = new Date();
+        await sleep(1000);
+        console.log(date.toLocaleString(), i);
+      }
+      console.log('Done');
+    })();
     return {
       statusCode: 200,
       headers: {
