@@ -76,7 +76,7 @@ export interface EmptyValueSelectableElement {
   optionId: number;
 }
 
-export interface Field {
+export interface EF_Field {
   name: string;
   type: string;
   visible: boolean;
@@ -157,8 +157,8 @@ export interface Field {
   timePlaceholder: string;
 }
 
-export interface Fieldset {
-  fields: Field[];
+export interface EF_Fieldset {
+  fields: EF_Field[];
   replicationConf?: any;
   showWithNextSet: boolean;
   name: string;
@@ -170,7 +170,7 @@ export interface EF_Event_Ui {
   name: string;
   buttons: any[];
   validators: any[];
-  fieldsets: Fieldset[];
+  fieldsets: EF_Fieldset[];
 }
 
 export interface EF_Event_Ui_Response {

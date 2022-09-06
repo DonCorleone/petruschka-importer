@@ -7,7 +7,7 @@ export interface EmblemToShow {
 export interface EF_Event_Detail {
   id: string;
   groupId: string;
-  title: string;
+  title?: string;
   begin: Date;
   end: Date;
   eventDateString: string;
@@ -54,6 +54,8 @@ export interface EF_Event_Detail {
   countryOfOrigin: string;
   partner: string;
   url: string;
+  shortDesc?: string;
+  description?: string;
 }
 
 export interface EF_Event_Detail_Response {

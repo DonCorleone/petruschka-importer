@@ -3,7 +3,8 @@ import { MongoClient, UpdateResult } from 'mongodb';
 import { EF_Event_Detail } from '../../models/EF_Event_Detail';
 import getEvents from '../../services/efService';
 import getEventById from '../../services/efDetailService';
-import getEventUiById from '../../services/efUiService';
+import getEventUiById, {getPropertiesFromJson} from '../../services/efUiService';
+// import getPropertiesFromJson from "../../services/propertyMapper";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -32,12 +33,21 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       const eventDetail = await getEventById(efEvent.id);
       const eventUi = await getEventUiById(efEvent.id);
 
+      const UiProps = getPropertiesFromJson(eventUi);
+      
       asyncFunctions.push(
         collection.updateOne(
           { id: efEvent.id },
           { $set: { ...eventDetail.pop() } },
           { upsert: true }
         )
+      );
+      asyncFunctions.push(
+          collection.updateOne(
+              { id: efEvent.id },
+              { $set: { shortDesc: UiProps.shortDesc, description: UiProps.description } },
+              { upsert: true }
+          )
       );
     }
     const result = await Promise.all(asyncFunctions);
