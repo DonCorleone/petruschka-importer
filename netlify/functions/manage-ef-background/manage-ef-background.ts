@@ -21,7 +21,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       },
       body: JSON.stringify('hello-background')
     };
-  } catch (err) {
+  } catch (err: any) {
     return {
       statusCode: 500,
       headers: {

@@ -25,7 +25,7 @@ export const handler: Handler = async (event, context) => {
     } else {
       return { statusCode: 500, body: 'no env' };
     }
-  } catch (error) {
+  } catch (error: any) {
     return { statusCode: 500, body: error.toString() };
   }
 };
