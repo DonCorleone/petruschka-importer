@@ -1,8 +1,9 @@
 import { Handler, HandlerContext, HandlerEvent } from '@netlify/functions';
-import {MongoClient, UpdateResult} from "mongodb";
-import {EF_Event_Detail} from "../../models/EF_Event_Detail";
-import getEvents from "../../services/efService";
-import getEventById from "../../services/efDetailService";
+import { MongoClient, UpdateResult } from 'mongodb';
+import { EF_Event_Detail } from '../../models/EF_Event_Detail';
+import getEvents from '../../services/efService';
+import getEventById from '../../services/efDetailService';
+import getEventUiById from '../../services/efUiService';
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -24,27 +25,21 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
     }
 
     const collection = database.collection<EF_Event_Detail>(collectionName);
-
     const efEvents = await getEvents();
 
     const asyncFunctions: Promise<UpdateResult>[] = [];
-
     for (const efEvent of efEvents) {
-      console.log(JSON.stringify(efEvent));
-
       const eventDetail = await getEventById(efEvent.id);
+      const eventUi = await getEventUiById(efEvent.id);
 
       asyncFunctions.push(
-          collection.updateOne(
-              { id: efEvent.id },
-              { $set: { ...eventDetail.pop() } },
-              { upsert: true }
-          )
+        collection.updateOne(
+          { id: efEvent.id },
+          { $set: { ...eventDetail.pop() } },
+          { upsert: true }
+        )
       );
     }
-
-    console.log('finito');
-
     const result = await Promise.all(asyncFunctions);
     return {
       statusCode: 200,

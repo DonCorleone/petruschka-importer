@@ -28,11 +28,11 @@ export default async function getEvents(): Promise<EF_Event_Overview[]> {
 
   const list: EF_Event_Overview[] | unknown = response.events;
 
-  const efEvents = list as EF_Event_Overview[];
+  const efEventOverviews = list as EF_Event_Overview[];
 
-  if (!efEvents || !efEvents.length) {
-    throw new Error('no Events found on EF');
+  if (!efEventOverviews || !efEventOverviews.length) {
+    throw new Error('no EventOverviews found on EF');
   }
 
-  return efEvents;
+  return efEventOverviews;
 }

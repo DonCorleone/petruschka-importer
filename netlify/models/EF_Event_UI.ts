@@ -165,7 +165,7 @@ export interface Fieldset {
   visible: boolean;
 }
 
-export interface PrjCockpitv3EventGeneral {
+export interface EF_Event_Ui {
   id: string;
   name: string;
   buttons: any[];
@@ -173,6 +173,6 @@ export interface PrjCockpitv3EventGeneral {
   fieldsets: Fieldset[];
 }
 
-export interface RootObject {
-  pxy: PrjCockpitv3EventGeneral;
+export interface EF_Event_Ui_Response {
+  "prj-cockpitv3_event_general": EF_Event_Ui;
 }
