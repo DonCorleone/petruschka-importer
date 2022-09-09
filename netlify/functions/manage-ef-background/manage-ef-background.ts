@@ -3,7 +3,7 @@ import { MongoClient, UpdateResult } from 'mongodb';
 import { EF_Event_Detail } from '../../models/EF_Event_Detail';
 import getEvents from '../../services/efService';
 import getEventById from '../../services/efDetailService';
-import getEventUiById, {getPropertiesFromJson} from '../../services/efUiService';
+import getEventUiById, {getArtistsFromDesc, getPropertiesFromJson} from '../../services/efUiService';
 // import getPropertiesFromJson from "../../services/propertyMapper";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
@@ -33,7 +33,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       const eventDetail = await getEventById(efEvent.id);
       const eventUi = await getEventUiById(efEvent.id);
 
-      const UiProps = getPropertiesFromJson(eventUi);
+      const uiProps = getPropertiesFromJson(eventUi);
       
       asyncFunctions.push(
         collection.updateOne(
@@ -42,10 +42,16 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
           { upsert: true }
         )
       );
+
+      let artists = '';
+      if (uiProps.description){
+        artists = getArtistsFromDesc(uiProps.description);        
+      }
+      
       asyncFunctions.push(
           collection.updateOne(
               { id: efEvent.id },
-              { $set: { shortDesc: UiProps.shortDesc, description: UiProps.description } },
+              { $set: { shortDesc: uiProps.shortDesc, description: uiProps.description, artists: artists } },
               { upsert: true }
           )
       );

@@ -56,6 +56,7 @@ export interface EF_Event_Detail {
   url: string;
   shortDesc?: string;
   description?: string;
+  artists?: string;
 }
 
 export interface EF_Event_Detail_Response {

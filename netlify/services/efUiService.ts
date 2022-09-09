@@ -43,3 +43,41 @@ export function getPropertiesFromJson(eventUi: EF_Event_Ui) : Event_Ui_Props{
         description: eventUi.fieldsets.find(p => p.name == "descriptionForm")?.fields.find(f => f.name == "eventBasic_description")?.value,
     }
 }
+
+export function getArtistsFromDesc(description: string) : string{
+    
+    const regexpArtists = /<p><strong>Mitwirkende<\/strong><\/p>\n<ul>\n([[:blank:]][[:blank:]]<li>.+<\/li>\n)*<\/ul>/g;
+    const artists = description.match(regexpArtists);
+    
+    if (!artists || artists.length == 0){
+        return '';
+    }
+    
+    const regexpLi = /(<[o|u]l>)?(<li>(?<value>.+?)<\/li>)+?(<\/[o|u]l>)*/g;
+    const matches = artists[0].match(regexpLi);
+    
+    if (!matches) {
+        return '';
+    }
+    
+    return matches.map(x => x.replace(/<\/?li>/g, '')).join(' | ');
+}
+
+export function getEventIdFromDesc(description: string) : string{
+
+    const regexpArtists = /<p><strong>Mitwirkende<\/strong><\/p>\n<ul>\n([[:blank:]][[:blank:]]<li>.+<\/li>\n)*<\/ul>/g;
+    const artists = description.match(regexpArtists);
+
+    if (!artists || artists.length == 0){
+        return '';
+    }
+
+    const regexpLi = /(<[o|u]l>)?(<li>(?<value>.+?)<\/li>)+?(<\/[o|u]l>)*/g;
+    const matches = artists[0].match(regexpLi);
+
+    if (!matches) {
+        return '';
+    }
+
+    return matches.map(x => x.replace(/<\/?li>/g, '')).join(' | ');
+}
