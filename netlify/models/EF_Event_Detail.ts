@@ -57,6 +57,7 @@ export interface EF_Event_Detail {
   shortDesc?: string;
   description?: string;
   artists?: string;
+  facebookPixelId?: string;
 }
 
 export interface EF_Event_Detail_Response {

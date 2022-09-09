@@ -65,19 +65,8 @@ export function getArtistsFromDesc(description: string) : string{
 
 export function getEventIdFromDesc(description: string) : string{
 
-    const regexpArtists = /<p><strong>Mitwirkende<\/strong><\/p>\n<ul>\n([[:blank:]][[:blank:]]<li>.+<\/li>\n)*<\/ul>/g;
-    const artists = description.match(regexpArtists);
+    const regexpEventId = /<p><em>EventID\:(.+)*<\/em><\/p>/g;
+    const eventId = description.match(regexpEventId);
 
-    if (!artists || artists.length == 0){
-        return '';
-    }
-
-    const regexpLi = /(<[o|u]l>)?(<li>(?<value>.+?)<\/li>)+?(<\/[o|u]l>)*/g;
-    const matches = artists[0].match(regexpLi);
-
-    if (!matches) {
-        return '';
-    }
-
-    return matches.map(x => x.replace(/<\/?li>/g, '')).join(' | ');
+    return (eventId && eventId.length == 0) ? eventId[0] : '';
 }

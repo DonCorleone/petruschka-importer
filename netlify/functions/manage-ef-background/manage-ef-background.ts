@@ -3,7 +3,11 @@ import { MongoClient, UpdateResult } from 'mongodb';
 import { EF_Event_Detail } from '../../models/EF_Event_Detail';
 import getEvents from '../../services/efService';
 import getEventById from '../../services/efDetailService';
-import getEventUiById, {getArtistsFromDesc, getPropertiesFromJson} from '../../services/efUiService';
+import getEventUiById, {
+  getArtistsFromDesc,
+  getEventIdFromDesc,
+  getPropertiesFromJson
+} from '../../services/efUiService';
 // import getPropertiesFromJson from "../../services/propertyMapper";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
@@ -44,14 +48,16 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       );
 
       let artists = '';
+      let eventId = '';
       if (uiProps.description){
-        artists = getArtistsFromDesc(uiProps.description);        
+        artists = getArtistsFromDesc(uiProps.description);
+        eventId = getEventIdFromDesc(uiProps.description);
       }
       
       asyncFunctions.push(
           collection.updateOne(
               { id: efEvent.id },
-              { $set: { shortDesc: uiProps.shortDesc, description: uiProps.description, artists: artists } },
+              { $set: { shortDesc: uiProps.shortDesc, description: uiProps.description, artists: artists, facebookPixelId: eventId } },
               { upsert: true }
           )
       );
