@@ -6,6 +6,7 @@ import getEventById from '../../services/efDetailService';
 import getEventUiById, {
   getArtistsFromDesc,
   getEventIdFromDesc,
+  getGigTagFromDesc,
   getPropertiesFromJson
 } from '../../services/efUiService';
 // import getPropertiesFromJson from "../../services/propertyMapper";
@@ -38,28 +39,31 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       const eventUi = await getEventUiById(efEvent.id);
 
       const uiProps = getPropertiesFromJson(eventUi);
-      
-      asyncFunctions.push(
-        collection.updateOne(
-          { id: efEvent.id },
-          { $set: { ...eventDetail.pop() } },
-          { upsert: true }
-        )
-      );
 
       let artists = '';
       let eventId = '';
-      if (uiProps.description){
+      let gigTag = '';
+      if (uiProps.description) {
         artists = getArtistsFromDesc(uiProps.description);
         eventId = getEventIdFromDesc(uiProps.description);
+        gigTag = getGigTagFromDesc(uiProps.description);
       }
-      
+
       asyncFunctions.push(
-          collection.updateOne(
-              { id: efEvent.id },
-              { $set: { shortDesc: uiProps.shortDesc, description: uiProps.description, artists: artists, facebookPixelId: eventId } },
-              { upsert: true }
-          )
+        collection.updateOne(
+          { id: efEvent.id },
+          {
+            $set: {
+              ...eventDetail.pop(),
+              shortDesc: uiProps.shortDesc,
+              description: uiProps.description,
+              artists: artists,
+              facebookPixelId: eventId,
+              googleAnalyticsTracker: gigTag
+            }
+          },
+          { upsert: true }
+        )
       );
     }
     const result = await Promise.all(asyncFunctions);

@@ -58,6 +58,7 @@ export interface EF_Event_Detail {
   description?: string;
   artists?: string;
   facebookPixelId?: string;
+  googleAnalyticsTracker?: string;
 }
 
 export interface EF_Event_Detail_Response {
