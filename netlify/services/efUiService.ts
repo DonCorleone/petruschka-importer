@@ -1,6 +1,7 @@
 import fetch, { HeadersInit } from 'node-fetch';
 import { EF_Event_Ui, EF_Event_Ui_Response } from '../models/EF_Event_UI';
 import { Event_Ui_Props } from '../models/Event_Ui_Props';
+import {EmblemToShow, EventInfo, TicketType} from "../models/EF_Event_Detail";
 
 export default async function getEvents(eventId: string): Promise<EF_Event_Ui> {
   const auth = process.env.EF_AUTH;
@@ -77,4 +78,27 @@ export function getGigTagFromDesc(description: string): string {
   const gigTag = description.match(regexpGigTag);
 
   return gigTag && gigTag.length > 1 ? gigTag[1] : '';
+}
+
+export function getEventInfos (name: string | undefined): EventInfo[] {
+  return [{
+    name: name ?? 'ToDo',
+    languageId: 0,
+  }];
+}
+
+export function getTicketTypes (emblemToShow: EmblemToShow | undefined): TicketType[] {
+  return [{
+    sortOrder: 0,
+    ticketTypeInfos: [
+      {
+        languageId: 0,
+        imageUrl: emblemToShow?.url ?? '',
+        name: 'Erwachsene'
+      },{
+        languageId: 0,
+        imageUrl: emblemToShow?.url ?? '',
+        name: 'Kinder'
+      }]
+  }]
 }

@@ -59,6 +59,24 @@ export interface EF_Event_Detail {
   artists?: string;
   facebookPixelId?: string;
   googleAnalyticsTracker?: string;
+  eventInfos: EventInfo[];
+  ticketTypes: TicketType [];
+}
+
+export interface EventInfo {
+  name: string;
+  languageId: number;
+}
+
+export interface TicketType {
+  sortOrder: number;
+  ticketTypeInfos : TicketTypeInfo [];
+}
+
+export interface TicketTypeInfo {
+  languageId: number;
+  imageUrl: string;
+  name: string;
 }
 
 export interface EF_Event_Detail_Response {

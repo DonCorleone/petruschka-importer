@@ -5,9 +5,9 @@ import getEvents from '../../services/efService';
 import getEventById from '../../services/efDetailService';
 import getEventUiById, {
   getArtistsFromDesc,
-  getEventIdFromDesc,
+  getEventIdFromDesc, getEventInfos,
   getGigTagFromDesc,
-  getPropertiesFromJson
+  getPropertiesFromJson, getTicketTypes
 } from '../../services/efUiService';
 // import getPropertiesFromJson from "../../services/propertyMapper";
 
@@ -35,7 +35,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
 
     const asyncFunctions: Promise<UpdateResult>[] = [];
     for (const efEvent of efEvents) {
-      const eventDetail = await getEventById(efEvent.id);
+      const eventDetails = await getEventById(efEvent.id);
       const eventUi = await getEventUiById(efEvent.id);
 
       const uiProps = getPropertiesFromJson(eventUi);
@@ -49,17 +49,20 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
         gigTag = getGigTagFromDesc(uiProps.description);
       }
 
+      const eventDetail = eventDetails.pop();
       asyncFunctions.push(
         collection.updateOne(
           { id: efEvent.id },
           {
             $set: {
-              ...eventDetail.pop(),
+              ...eventDetail,
               shortDesc: uiProps.shortDesc,
               description: uiProps.description,
               artists: artists,
               facebookPixelId: eventId,
-              googleAnalyticsTracker: gigTag
+              googleAnalyticsTracker: gigTag,
+              eventInfos: getEventInfos(uiProps.title),
+              ticketTypes: getTicketTypes(eventDetail?.emblemToShow)
             }
           },
           { upsert: true }
