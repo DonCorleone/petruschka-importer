@@ -1,7 +1,7 @@
 import fetch, { HeadersInit } from 'node-fetch';
 import { EF_Event_Ui, EF_Event_Ui_Response } from '../models/EF_Event_UI';
 import { Event_Ui_Props } from '../models/Event_Ui_Props';
-import {EmblemToShow, EventInfo, TicketType} from "../models/EF_Event_Detail";
+import { EmblemToShow, EventInfo, TicketType } from '../models/EF_Event_Detail';
 
 export default async function getEvents(eventId: string): Promise<EF_Event_Ui> {
   const auth = process.env.EF_AUTH;
@@ -66,39 +66,55 @@ export function getArtistsFromDesc(description: string): string {
   return matches.map((x) => x.replace(/<\/?li>/g, '')).join(' | ');
 }
 
-export function getEventIdFromDesc(description: string): string {
-  const regexpEventId = /<p><em>EventID\:(.+)*<\/em><\/p>/;
-  const eventId = description.match(regexpEventId);
-
-  return eventId && eventId.length > 1 ? eventId[1] : '';
+export function getMetaInfoFromDesc(
+  description: string,
+  regExp: RegExp
+): string {
+  const metaInfo = description.match(regExp);
+  return metaInfo && metaInfo.length > 1 ? metaInfo[1] : '';
 }
 
-export function getGigTagFromDesc(description: string): string {
-  const regexpGigTag = /<p><em>Aufführung:?:(.*)<\/em><\/p>/;
-  const gigTag = description.match(regexpGigTag);
-
-  return gigTag && gigTag.length > 1 ? gigTag[1] : '';
+export function getEventInfos(
+  eventUi: Event_Ui_Props,
+  emblemToShow: EmblemToShow | undefined,
+  url: string | undefined
+): EventInfo[] {
+  return [
+    {
+      name: eventUi.title ?? 'ToDo',
+      languageId: 0,
+      importantNotes: '',
+      flyerImagePath: emblemToShow?.url ?? '',
+      shortDescription: eventUi.shortDesc ?? '',
+      longDescription:
+        eventUi.description?.substring(
+          0,
+          eventUi.description.indexOf('<p><strong>Mitwirkende')
+        ) ?? '',
+      bannerImagePath: emblemToShow?.url ?? '',
+      url: url ?? ''
+    }
+  ];
 }
 
-export function getEventInfos (name: string | undefined): EventInfo[] {
-  return [{
-    name: name ?? 'ToDo',
-    languageId: 0,
-  }];
-}
-
-export function getTicketTypes (emblemToShow: EmblemToShow | undefined): TicketType[] {
-  return [{
-    sortOrder: 0,
-    ticketTypeInfos: [
-      {
-        languageId: 0,
-        imageUrl: emblemToShow?.url ?? '',
-        name: 'Erwachsene'
-      },{
-        languageId: 0,
-        imageUrl: emblemToShow?.url ?? '',
-        name: 'Kinder'
-      }]
-  }]
+export function getTicketTypes(
+  emblemToShow: EmblemToShow | undefined
+): TicketType[] {
+  return [
+    {
+      sortOrder: 0,
+      ticketTypeInfos: [
+        {
+          languageId: 0,
+          imageUrl: emblemToShow?.url ?? '',
+          name: 'Erwachsene'
+        },
+        {
+          languageId: 0,
+          imageUrl: emblemToShow?.url ?? '',
+          name: 'Kinder'
+        }
+      ]
+    }
+  ];
 }

@@ -54,11 +54,13 @@ export interface EF_Event_Detail {
   countryOfOrigin: string;
   partner: string;
   url: string;
+  _id: string;
   shortDesc?: string;
   description?: string;
-  artists?: string;
   facebookPixelId?: string;
   googleAnalyticsTracker?: string;
+  notificationEmail: string;
+  start: Date;
   eventInfos: EventInfo[];
   ticketTypes: TicketType [];
 }
@@ -66,6 +68,13 @@ export interface EF_Event_Detail {
 export interface EventInfo {
   name: string;
   languageId: number;
+  importantNotes: string;
+  flyerImagePath: string;
+  shortDescription: string;
+  longDescription: string;
+  bannerImagePath: string;
+  artists?: string;
+  url: string;
 }
 
 export interface TicketType {

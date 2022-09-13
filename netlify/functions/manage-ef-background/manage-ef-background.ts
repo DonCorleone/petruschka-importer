@@ -5,9 +5,10 @@ import getEvents from '../../services/efService';
 import getEventById from '../../services/efDetailService';
 import getEventUiById, {
   getArtistsFromDesc,
-  getEventIdFromDesc, getEventInfos,
-  getGigTagFromDesc,
-  getPropertiesFromJson, getTicketTypes
+  getEventInfos,
+  getMetaInfoFromDesc,
+  getPropertiesFromJson,
+  getTicketTypes
 } from '../../services/efUiService';
 // import getPropertiesFromJson from "../../services/propertyMapper";
 
@@ -43,10 +44,22 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       let artists = '';
       let eventId = '';
       let gigTag = '';
+      let notificationEmail = '';
+
       if (uiProps.description) {
         artists = getArtistsFromDesc(uiProps.description);
-        eventId = getEventIdFromDesc(uiProps.description);
-        gigTag = getGigTagFromDesc(uiProps.description);
+        eventId = getMetaInfoFromDesc(
+          uiProps.description,
+          /<p><em>EventID\:(.+)*<\/em><\/p>/
+        );
+        gigTag = getMetaInfoFromDesc(
+          uiProps.description,
+          /<p><em>Aufführung:?:(.*)<\/em><\/p>/
+        );
+        notificationEmail = getMetaInfoFromDesc(
+          uiProps.description,
+          /<p><em>Buchungsanfrage per E-Mail an (.+)*<\/em><\/p>/
+        );
       }
 
       const eventDetail = eventDetails.pop();
@@ -56,12 +69,16 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
           {
             $set: {
               ...eventDetail,
-              shortDesc: uiProps.shortDesc,
-              description: uiProps.description,
-              artists: artists,
+              _id: eventDetail?.id,
               facebookPixelId: eventId,
               googleAnalyticsTracker: gigTag,
-              eventInfos: getEventInfos(uiProps.title),
+              notificationEmail,
+              start: eventDetail?.begin,
+              eventInfos: getEventInfos(
+                uiProps,
+                eventDetail?.emblemToShow,
+                eventDetail?.url
+              ),
               ticketTypes: getTicketTypes(eventDetail?.emblemToShow)
             }
           },
