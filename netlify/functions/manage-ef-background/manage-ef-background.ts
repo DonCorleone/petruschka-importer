@@ -3,6 +3,7 @@ import { MongoClient, UpdateResult } from 'mongodb';
 import { EF_Event_Detail } from '../../models/EF_Event_Detail';
 import getEvents from '../../services/efService';
 import getEventById from '../../services/efDetailService';
+import getLocationsById from '../../services/efLocationService';
 import getEventUiById, {
   getArtistsFromDesc,
   getEventInfos,
@@ -10,7 +11,6 @@ import getEventUiById, {
   getPropertiesFromJson,
   getTicketTypes
 } from '../../services/efUiService';
-// import getPropertiesFromJson from "../../services/propertyMapper";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -63,6 +63,11 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       }
 
       const eventDetail = eventDetails.pop();
+
+      const location = await getLocationsById(
+        eventDetail?.locationIds?.some ? eventDetail?.locationIds[0] : '-1'
+      );
+
       asyncFunctions.push(
         collection.updateOne(
           { id: efEvent.id },
@@ -77,7 +82,9 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
               eventInfos: getEventInfos(
                 uiProps,
                 eventDetail?.emblemToShow,
-                eventDetail?.url
+                eventDetail?.url,
+                artists,
+                location.title
               ),
               ticketTypes: getTicketTypes(eventDetail?.emblemToShow)
             }

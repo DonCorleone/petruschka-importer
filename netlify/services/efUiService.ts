@@ -77,13 +77,17 @@ export function getMetaInfoFromDesc(
 export function getEventInfos(
   eventUi: Event_Ui_Props,
   emblemToShow: EmblemToShow | undefined,
-  url: string | undefined
+  url: string | undefined,
+  artists: string | undefined,
+  location: string | undefined
 ): EventInfo[] {
   return [
     {
       name: eventUi.title ?? 'ToDo',
       languageId: 0,
       importantNotes: '',
+      artists: artists,
+      location: location,
       flyerImagePath: emblemToShow?.url ?? '',
       shortDescription: eventUi.shortDesc ?? '',
       longDescription:

@@ -62,7 +62,7 @@ export interface EF_Event_Detail {
   notificationEmail: string;
   start: Date;
   eventInfos: EventInfo[];
-  ticketTypes: TicketType [];
+  ticketTypes: TicketType[];
 }
 
 export interface EventInfo {
@@ -74,12 +74,13 @@ export interface EventInfo {
   longDescription: string;
   bannerImagePath: string;
   artists?: string;
+  location?: string;
   url: string;
 }
 
 export interface TicketType {
   sortOrder: number;
-  ticketTypeInfos : TicketTypeInfo [];
+  ticketTypeInfos: TicketTypeInfo[];
 }
 
 export interface TicketTypeInfo {

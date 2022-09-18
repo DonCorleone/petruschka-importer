@@ -1,0 +1,27 @@
+{
+  "id": "59212",
+  "ownerId": null,
+  "title": "Natur-Museum",
+  "addressLine": "Kasernenplatz 6",
+  "streetName": "Kasernenplatz",
+  "streetNumber": "6",
+  "zip": "6003",
+  "city": "Luzern",
+  "country": "Schweiz",
+  "url": "/de/locations/Natur-Museum-59212.html",
+  "lat": 47.0517,
+  "lng": 8.30103,
+  "modifyDate": "2020-09-01T00:00:50+02:00",
+  "creatorId": "0",
+  "numActiveEvents": 2,
+  "numTotalEvents": 4,
+  "canEdit": false,
+  "canDelete": false,
+  "isComplete": true,
+  "activeEvents": ["6974705914298164033", "6974706161791462448"],
+  "logo": {
+    "url": "/img/locations/tf_location_default_small.png",
+    "width": 60,
+    "height": 60
+  }
+}
