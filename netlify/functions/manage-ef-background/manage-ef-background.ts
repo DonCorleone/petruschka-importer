@@ -11,6 +11,7 @@ import getEventUiById, {
   getPropertiesFromJson,
   getTicketTypes
 } from '../../services/efUiService';
+import getVisibilityByEventId from "../../services/efVisibilityService";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -68,6 +69,8 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
         eventDetail?.locationIds?.some ? eventDetail?.locationIds[0] : '-1'
       );
 
+      const visibility = await getVisibilityByEventId(eventDetail?.id ?? '');
+      
       asyncFunctions.push(
         collection.updateOne(
           { id: efEvent.id },
@@ -86,7 +89,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
                 artists,
                 location.title
               ),
-              ticketTypes: getTicketTypes(eventDetail?.emblemToShow)
+              ticketTypes: getTicketTypes(eventDetail?.emblemToShow, visibility)
             }
           },
           { upsert: true }

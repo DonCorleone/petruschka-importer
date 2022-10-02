@@ -102,11 +102,12 @@ export function getEventInfos(
 }
 
 export function getTicketTypes(
-  emblemToShow: EmblemToShow | undefined
+  emblemToShow: EmblemToShow | undefined, visibility: string | undefined
 ): TicketType[] {
   return [
     {
       sortOrder: 0,
+      preSaleStart: visibility ? new Date(visibility) : new Date(),
       ticketTypeInfos: [
         {
           languageId: 0,

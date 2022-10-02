@@ -79,6 +79,7 @@ export interface EventInfo {
 }
 
 export interface TicketType {
+  preSaleStart : Date;
   sortOrder: number;
   ticketTypeInfos: TicketTypeInfo[];
 }
