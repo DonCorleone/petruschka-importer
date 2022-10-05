@@ -12,6 +12,7 @@ import getEventUiById, {
   getTicketTypes
 } from '../../services/efUiService';
 import getVisibilityByEventId from "../../services/efVisibilityService";
+import getEventGroup from "../../services/efGroupService";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -38,6 +39,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
     const asyncFunctions: Promise<UpdateResult>[] = [];
     for (const efEvent of efEvents) {
       const eventDetails = await getEventById(efEvent.id);
+      
       const eventUi = await getEventUiById(efEvent.id);
 
       const uiProps = getPropertiesFromJson(eventUi);
@@ -69,6 +71,10 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
         eventDetail?.locationIds?.some ? eventDetail?.locationIds[0] : '-1'
       );
 
+      if (eventDetail?.groupId){
+        const group = await getEventGroup(eventDetail?.groupId);        
+      }
+      
       const visibility = await getVisibilityByEventId(eventDetail?.id ?? '');
       
       asyncFunctions.push(
