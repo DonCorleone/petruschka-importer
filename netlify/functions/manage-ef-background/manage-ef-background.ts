@@ -13,6 +13,7 @@ import getEventUiById, {
 } from '../../services/efUiService';
 import getVisibilityByEventId from "../../services/efVisibilityService";
 import getEventGroup from "../../services/efGroupService";
+import getTickets from "../../services/efTicketsService";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -76,6 +77,8 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       }
       
       const visibility = await getVisibilityByEventId(eventDetail?.id ?? '');
+      
+      const tickets = await getTickets(eventDetail?.id ?? '');
       
       asyncFunctions.push(
         collection.updateOne(

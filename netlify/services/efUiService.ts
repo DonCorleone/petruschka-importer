@@ -17,7 +17,7 @@ export default async function getEvents(eventId: string): Promise<EF_Event_Ui> {
     Cookie: cookie
   };
 
-  const resp = await fetch(uri + '&eventid=' + eventId, {
+  const resp = await fetch(uri + '?eventid=' + eventId, {
     method: 'GET',
     headers: myHeaders,
     redirect: 'follow'
