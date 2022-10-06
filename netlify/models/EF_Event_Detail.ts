@@ -1,3 +1,5 @@
+import { Double } from 'mongodb';
+
 export interface EmblemToShow {
   url: string;
   width: number;
@@ -79,8 +81,9 @@ export interface EventInfo {
 }
 
 export interface TicketType {
-  preSaleStart : Date;
+  preSaleStart: Date;
   sortOrder: number;
+  price: Double;
   ticketTypeInfos: TicketTypeInfo[];
 }
 
@@ -88,6 +91,7 @@ export interface TicketTypeInfo {
   languageId: number;
   imageUrl: string;
   name: string;
+  description: string;
 }
 
 export interface EF_Event_Detail_Response {

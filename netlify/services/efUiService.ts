@@ -2,6 +2,9 @@ import fetch, { HeadersInit } from 'node-fetch';
 import { EF_Event_Ui, EF_Event_Ui_Response } from '../models/EF_Event_UI';
 import { Event_Ui_Props } from '../models/Event_Ui_Props';
 import { EmblemToShow, EventInfo, TicketType } from '../models/EF_Event_Detail';
+import { EF_Ticket_Info } from './efTicketsService';
+import { Category } from '../models/EF_Event_Categories';
+import { Double } from 'mongodb';
 
 export default async function getEvents(eventId: string): Promise<EF_Event_Ui> {
   const auth = process.env.EF_AUTH;
@@ -102,24 +105,29 @@ export function getEventInfos(
 }
 
 export function getTicketTypes(
-  emblemToShow: EmblemToShow | undefined, visibility: string | undefined
+  visibility: string | undefined,
+  categories: Category[],
+  ticket: EF_Ticket_Info,
+  eventKey: string
 ): TicketType[] {
-  return [
-    {
-      sortOrder: 0,
-      preSaleStart: visibility ? new Date(visibility) : new Date(),
+  const ticketTypes: TicketType[] = [];
+
+  categories.forEach((cat, ix) => {
+    ticketTypes.push({
       ticketTypeInfos: [
         {
           languageId: 0,
-          imageUrl: emblemToShow?.url ?? '',
-          name: 'Erwachsene'
-        },
-        {
-          languageId: 0,
-          imageUrl: emblemToShow?.url ?? '',
-          name: 'Kinder'
+          imageUrl: ticket?.logotext
+            ? `/assets/images/${ticket.logotext}/${ticket.logotext}_${eventKey}`
+            : '',
+          description: ticket?.conditions ?? '',
+          name: cat.title
         }
-      ]
-    }
-  ];
+      ],
+      sortOrder: ix,
+      preSaleStart: visibility ? new Date(visibility) : new Date(),
+      price: new Double(cat.priceStrategy.highestPrice)
+    });
+  });
+  return ticketTypes;
 }

@@ -14,6 +14,7 @@ import getEventUiById, {
 import getVisibilityByEventId from "../../services/efVisibilityService";
 import getEventGroup from "../../services/efGroupService";
 import getTickets from "../../services/efTicketsService";
+import getEventCategories from "../../services/efCategoriesService";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -46,13 +47,13 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       const uiProps = getPropertiesFromJson(eventUi);
 
       let artists = '';
-      let eventId = '';
+      let eventKey = '';
       let gigTag = '';
       let notificationEmail = '';
 
       if (uiProps.description) {
         artists = getArtistsFromDesc(uiProps.description);
-        eventId = getMetaInfoFromDesc(
+        eventKey = getMetaInfoFromDesc(
           uiProps.description,
           /<p><em>EventID\:(.+)*<\/em><\/p>/
         );
@@ -77,6 +78,8 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       }
       
       const visibility = await getVisibilityByEventId(eventDetail?.id ?? '');
+
+      const categories = await getEventCategories(eventDetail?.id ?? '');
       
       const tickets = await getTickets(eventDetail?.id ?? '');
       
@@ -87,7 +90,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
             $set: {
               ...eventDetail,
               _id: eventDetail?.id,
-              facebookPixelId: eventId,
+              facebookPixelId: eventKey,
               googleAnalyticsTracker: gigTag,
               notificationEmail,
               start: eventDetail?.begin,
@@ -98,7 +101,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
                 artists,
                 location.title
               ),
-              ticketTypes: getTicketTypes(eventDetail?.emblemToShow, visibility)
+              ticketTypes: getTicketTypes(visibility, categories, tickets, eventKey)
             }
           },
           { upsert: true }

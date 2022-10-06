@@ -1,5 +1,3 @@
-import {EF_Event_Detail} from "./EF_Event_Detail";
-
 export interface ImageToShow {
   url: string;
   width: number;

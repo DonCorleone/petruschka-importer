@@ -1,11 +1,9 @@
 import fetch, { HeadersInit } from 'node-fetch';
-import {
-  EF_Event_Detail,
-  EF_Event_Detail_Response
-} from '../models/EF_Event_Detail';
-import {EF_Event_Group, EF_Event_Group_Response} from "../models/EF_Group";
+import { EF_Event_Group } from '../models/EF_Group';
 
-export default async function getEventGroup(eventGroupId: string): Promise<EF_Event_Group> {
+export default async function getEventGroup(
+  eventGroupId: string
+): Promise<EF_Event_Group> {
   const auth = process.env.EF_AUTH;
   const cookie = process.env.EF_COOKIE;
   const uri = process.env.EF_URL_GROUP;
