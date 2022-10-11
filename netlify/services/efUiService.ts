@@ -126,7 +126,8 @@ export function getTicketTypes(
       ],
       sortOrder: ix,
       preSaleStart: visibility ? new Date(visibility) : new Date(),
-      price: new Double(cat.priceStrategy.highestPrice)
+      price: new Double(cat.priceStrategy.highestPrice),
+      currency: 'CHF'
     });
   });
   return ticketTypes;

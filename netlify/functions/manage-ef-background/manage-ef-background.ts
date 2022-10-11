@@ -11,10 +11,12 @@ import getEventUiById, {
   getPropertiesFromJson,
   getTicketTypes
 } from '../../services/efUiService';
-import getVisibilityByEventId from "../../services/efVisibilityService";
-import getEventGroup from "../../services/efGroupService";
-import getTickets, {getCategoriesFromTicket} from "../../services/efTicketsService";
-import getEventCategories from "../../services/efCategoriesService";
+import getVisibilityByEventId from '../../services/efVisibilityService';
+import getEventGroup from '../../services/efGroupService';
+import getTickets, {
+  getCategoriesFromTicket
+} from '../../services/efTicketsService';
+import getEventCategories from '../../services/efCategoriesService';
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -41,7 +43,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
     const asyncFunctions: Promise<UpdateResult>[] = [];
     for (const efEvent of efEvents) {
       const eventDetails = await getEventById(efEvent.id);
-      
+
       const eventUi = await getEventUiById(efEvent.id);
 
       const uiProps = getPropertiesFromJson(eventUi);
@@ -73,31 +75,34 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
         eventDetail?.locationIds?.some ? eventDetail?.locationIds[0] : '-1'
       );
 
-      if (eventDetail?.groupId){
-        const group = await getEventGroup(eventDetail?.groupId);        
+      if (eventDetail?.groupId) {
+        const group = await getEventGroup(eventDetail?.groupId);
       }
-      
+
       const visibility = await getVisibilityByEventId(eventDetail?.id ?? '');
 
       let categories = await getEventCategories(eventDetail?.id ?? '');
-      
+
       const tickets = await getTickets(eventDetail?.id ?? '');
 
-      if (!categories || !categories.length){
-        categories = getCategoriesFromTicket(tickets)
+      if (!categories || !categories.length) {
+        categories = getCategoriesFromTicket(tickets);
       }
-      
+
       asyncFunctions.push(
         collection.updateOne(
           { id: efEvent.id },
           {
             $set: {
               ...eventDetail,
-              _id: eventDetail?.id,
+              _id: new Date(eventDetail?.creationDate ?? '').valueOf(),
               facebookPixelId: eventKey,
+              status: 1,
               googleAnalyticsTracker: gigTag,
               notificationEmail,
-              start: eventDetail?.begin,
+              start: new Date(
+                eventDetail ? eventDetail.begin : ''
+              ) /* eventDetail?.begin */,
               eventInfos: getEventInfos(
                 uiProps,
                 eventDetail?.emblemToShow,
@@ -105,7 +110,12 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
                 artists,
                 location.title
               ),
-              ticketTypes: getTicketTypes(visibility, categories, tickets, eventKey)
+              ticketTypes: getTicketTypes(
+                visibility,
+                categories,
+                tickets,
+                eventKey
+              )
             }
           },
           { upsert: true }
