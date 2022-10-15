@@ -17,6 +17,7 @@ import getTickets, {
   getCategoriesFromTicket
 } from '../../services/efTicketsService';
 import getEventCategories from '../../services/efCategoriesService';
+import getPresaleInfoByEventId from "../../services/efPresaleService";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -86,23 +87,29 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       const tickets = await getTickets(eventDetail?.id ?? '');
 
       if (!categories || !categories.length) {
-        categories = getCategoriesFromTicket(tickets);
+        categories = getCategoriesFromTicket(tickets.conditions);
       }
+
+      if (!categories || !categories.length) {
+        categories = getCategoriesFromTicket(uiProps.description);
+      }
+      
+      const presaleInfo = await getPresaleInfoByEventId(eventDetail?.id ?? '');
+      const start = new Date(eventDetail?.begin ?? '');
+      const _id = start.valueOf();
 
       asyncFunctions.push(
         collection.updateOne(
-          { id: efEvent.id },
+          { _id: _id },
           {
             $set: {
               ...eventDetail,
-              _id: new Date(eventDetail?.creationDate ?? '').valueOf(),
+              _id,
               facebookPixelId: eventKey,
               status: 1,
               googleAnalyticsTracker: gigTag,
               notificationEmail,
-              start: new Date(
-                eventDetail ? eventDetail.begin : ''
-              ) /* eventDetail?.begin */,
+              start, /* eventDetail?.begin */
               eventInfos: getEventInfos(
                 uiProps,
                 eventDetail?.emblemToShow,

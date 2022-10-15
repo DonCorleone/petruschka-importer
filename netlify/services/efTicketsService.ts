@@ -49,11 +49,11 @@ export default async function getTickets(
 }
 
 export function getCategoriesFromTicket(
-  ticketConditions: EF_Ticket_Info
+  ticketConditions?: string
 ): Category[] {
   const regexp = /(Erwachsene|Kinder): CHF (\d+(?:\.\d{1,2})?)/g;
 
-  const categoryStrings = ticketConditions.conditions.match(regexp);
+  const categoryStrings = ticketConditions?.match(regexp);
 
   let categories: Category[] = [];
   if (categoryStrings?.length) {
