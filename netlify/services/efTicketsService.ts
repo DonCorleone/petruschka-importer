@@ -3,7 +3,7 @@ import { EF_Tickets_Response, Field, Fieldset } from '../models/EF_Tickets';
 import { Category } from '../models/EF_Event_Categories';
 
 export interface EF_Ticket_Info {
-  conditions: string;
+  conditions?: string;
   logotext: string;
 }
 
@@ -43,7 +43,7 @@ export default async function getTickets(
   );
 
   return {
-    conditions: conditions?.value ?? '',
+    conditions: conditions?.value ?? undefined,
     logotext: logotext?.value ?? ''
   };
 }

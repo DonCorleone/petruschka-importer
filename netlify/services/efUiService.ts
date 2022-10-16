@@ -1,7 +1,7 @@
 import fetch, { HeadersInit } from 'node-fetch';
 import { EF_Event_Ui, EF_Event_Ui_Response } from '../models/EF_Event_UI';
 import { Event_Ui_Props } from '../models/Event_Ui_Props';
-import { EmblemToShow, EventInfo, TicketType } from '../models/EF_Event_Detail';
+import { EventInfo, TicketType } from '../models/EF_Event_Detail';
 import { EF_Ticket_Info } from './efTicketsService';
 import { Category } from '../models/EF_Event_Categories';
 import { Double } from 'mongodb';
@@ -79,7 +79,7 @@ export function getMetaInfoFromDesc(
 
 export function getEventInfos(
   eventUi: Event_Ui_Props,
-  emblemToShow: EmblemToShow | undefined,
+  eventKey: string,
   url: string | undefined,
   artists: string | undefined,
   location: string | undefined
@@ -91,14 +91,14 @@ export function getEventInfos(
       importantNotes: '',
       artists: artists,
       location: location,
-      flyerImagePath: emblemToShow?.url ?? '',
+      flyerImagePath: `https://petruschka.netlify.app/assets/images/main/portrait/${eventKey}.jpg` ,
       shortDescription: eventUi.shortDesc ?? '',
       longDescription:
         eventUi.description?.substring(
           0,
           eventUi.description.indexOf('<p><strong>Mitwirkende')
         ) ?? '',
-      bannerImagePath: emblemToShow?.url ?? '',
+      bannerImagePath: `https://petruschka.netlify.app/assets/images/main/landscape/${eventKey}.jpg`,
       url: url ?? ''
     }
   ];
@@ -108,7 +108,8 @@ export function getTicketTypes(
   visibility: string | undefined,
   categories: Category[],
   ticket: EF_Ticket_Info,
-  eventKey: string
+  eventKey: string,
+  presaleInfo: string
 ): TicketType[] {
   const ticketTypes: TicketType[] = [];
 
@@ -120,7 +121,7 @@ export function getTicketTypes(
           imageUrl: ticket?.logotext
             ? `/assets/images/${ticket.logotext}/${ticket.logotext}_${eventKey}`
             : '',
-          description: ticket?.conditions ?? '',
+          description: ticket?.conditions ?? presaleInfo,
           name: cat.title
         }
       ],

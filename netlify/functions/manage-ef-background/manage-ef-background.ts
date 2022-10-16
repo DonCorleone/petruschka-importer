@@ -17,7 +17,7 @@ import getTickets, {
   getCategoriesFromTicket
 } from '../../services/efTicketsService';
 import getEventCategories from '../../services/efCategoriesService';
-import getPresaleInfoByEventId from "../../services/efPresaleService";
+import getPresaleInfoByEventId from '../../services/efPresaleService';
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -93,7 +93,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       if (!categories || !categories.length) {
         categories = getCategoriesFromTicket(uiProps.description);
       }
-      
+
       const presaleInfo = await getPresaleInfoByEventId(eventDetail?.id ?? '');
       const start = new Date(eventDetail?.begin ?? '');
       const _id = start.valueOf();
@@ -109,10 +109,10 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
               status: 1,
               googleAnalyticsTracker: gigTag,
               notificationEmail,
-              start, /* eventDetail?.begin */
+              start /* eventDetail?.begin */,
               eventInfos: getEventInfos(
                 uiProps,
-                eventDetail?.emblemToShow,
+                eventKey,
                 eventDetail?.url,
                 artists,
                 location.title
@@ -121,7 +121,8 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
                 visibility,
                 categories,
                 tickets,
-                eventKey
+                eventKey,
+                presaleInfo
               )
             }
           },
