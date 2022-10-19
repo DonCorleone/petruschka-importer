@@ -84,14 +84,19 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
 
       let categories = await getEventCategories(eventDetail?.id ?? '');
 
+      // tickets defined in EF?
       const tickets = await getTickets(eventDetail?.id ?? '');
-
+      
       if (!categories || !categories.length) {
         categories = getCategoriesFromTicket(tickets.conditions);
       }
-
-      if (!categories || !categories.length) {
+      
+      let eventUrl = 'https://eventfrog.ch' + eventDetail?.url;
+      
+      if (!categories || !categories.length){
+        // Get TicketInfo from Description
         categories = getCategoriesFromTicket(uiProps.description);
+        eventUrl = 'https://petruschka.ch'
       }
 
       const presaleInfo = await getPresaleInfoByEventId(eventDetail?.id ?? '');
@@ -113,7 +118,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
               eventInfos: getEventInfos(
                 uiProps,
                 eventKey,
-                eventDetail?.url,
+                eventUrl,
                 artists,
                 location.title
               ),
