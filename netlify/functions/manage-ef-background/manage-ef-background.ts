@@ -18,6 +18,7 @@ import getTickets, {
 } from '../../services/efTicketsService';
 import getEventCategories from '../../services/efCategoriesService';
 import getPresaleInfoByEventId from '../../services/efPresaleService';
+import getEventAgenda, {getAgendaFromJson} from "../../services/efAgendaService";
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -48,7 +49,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       const eventUi = await getEventUiById(efEvent.id);
 
       const uiProps = getPropertiesFromJson(eventUi);
-
+      
       let artists = '';
       let eventKey = '';
       let gigTag = '';
@@ -96,7 +97,11 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       if (!categories || !categories.length){
         // Get TicketInfo from Description
         categories = getCategoriesFromTicket(uiProps.description);
-        eventUrl = 'https://petruschka.ch'
+
+        const agenda = await getEventAgenda(efEvent.id);
+
+        const agendaPrps = getAgendaFromJson(agenda);
+        eventUrl = agendaPrps.link ?? 'https://petruschka.ch';
       }
 
       const presaleInfo = await getPresaleInfoByEventId(eventDetail?.id ?? '');
