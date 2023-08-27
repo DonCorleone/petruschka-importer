@@ -17,14 +17,19 @@ export default async function getEventCategories(
 
   const myHeaders: HeadersInit = {
     Authorization: auth,
-    Cookie: cookie
+    Cookie: cookie,
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   };
 
   const resp = await fetch(uri + eventId + '/categories', {
     method: 'GET',
-    headers: myHeaders,
-    redirect: 'follow'
+    headers: myHeaders
   });
+
+  // Log the response body and headers
+  console.log(await resp.text());
+  console.log(resp.headers.raw());
 
   if (!resp.ok) {
     return [];
