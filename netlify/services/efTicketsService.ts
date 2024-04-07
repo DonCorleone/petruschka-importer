@@ -1,6 +1,7 @@
 import fetch, { HeadersInit } from 'node-fetch';
 import { EF_Tickets_Response, Field, Fieldset } from '../models/EF_Tickets';
 import { Category } from '../models/EF_Event_Categories';
+import { getUnpackedSettings } from 'http2';
 
 export interface EF_Ticket_Info {
   conditions?: string;
@@ -10,7 +11,8 @@ export interface EF_Ticket_Info {
 export default async function getTickets(
   eventId: string
 ): Promise<EF_Ticket_Info> {
-  const auth = process.env.EF_AUTH;
+  const auth = 
+  process.env.EF_AUTH;
   const cookie = process.env.EF_COOKIE;
   const uri = process.env.EF_URL_EVENT_TICKETS;
 
@@ -29,11 +31,11 @@ export default async function getTickets(
     redirect: 'follow'
   });
 
-  const response = (await resp.json()) as EF_Tickets_Response;
+  const response = (await resp?.size > 0 ? resp.json(): {}) as EF_Tickets_Response;
 
-  const fieldSet: Fieldset | undefined = response[
+  const fieldSet: Fieldset | undefined = response ? response[
     'prj-cockpitv3_tickets_combined'
-  ].fieldsets.find((fs) => fs.name === 'prj-cockpitv3_tickets_text');
+  ]?.fieldsets?.find((fs) => fs.name === 'prj-cockpitv3_tickets_text') : undefined;
 
   const conditions: Field | undefined = fieldSet?.fields.find(
     (f) => f.name === 'conditions'

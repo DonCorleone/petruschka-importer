@@ -1,5 +1,7 @@
 # petruschka-importer
+VS Code:
 
+RUN AND DEBUG "netlify functions:serve" (NODE_OPTIONS=--inspect netlify functions:serve)
 
-NODE_OPTIONS=--inspect netlify functions:serve
-http://localhost:9999/.netlify/functions/hello-background
+Open:
+http://localhost:9999/.netlify/functions/manage-ef-background
