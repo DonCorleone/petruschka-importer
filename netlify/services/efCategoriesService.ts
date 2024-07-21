@@ -15,29 +15,39 @@ export default async function getEventCategories(
     throw new Error('no ef uri or no auth');
   }
 
-  const myHeaders: HeadersInit = {
+  const url = uri + eventId + '/categories';
+
+  const myHeaders = {
     Authorization: auth,
-    Cookie: cookie
+    Cookie: cookie,
+      "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10.15; rv:125.0) Gecko/20100101 Firefox/125.0",
+      "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8",
+      "Accept-Language": "en,de;q=0.7,en-US;q=0.3",
+      "Upgrade-Insecure-Requests": "1",
+      "Sec-Fetch-Dest": "document",
+      "Sec-Fetch-Mode": "navigate",
+      "Sec-Fetch-Site": "none",
+      "Sec-Fetch-User": "?1"
   };
-
-  const resp = await fetch(uri + eventId + '/categories', {
-    method: 'GET',
-    headers: myHeaders,
-    redirect: 'follow'
+  
+  const resp = await fetch(url, {
+      method: 'GET',
+      headers: myHeaders,
+      redirect: 'follow'
   });
-
+  
   if (!resp.ok) {
-    return [];
+      return [];
   }
 
   const response = (await resp.json()) as EF_Categories_Response;
 
-  const list: Category[] | unknown = response.categories;
+  const list: Category[] | unknown = response.data;
 
   const efEventCategories = list as Category[];
 
   if (!efEventCategories || !efEventCategories.length) {
-    throw new Error('no EventOverviews found on EF');
+    return []; //throw new Error('no EventOverviews found on EF');
   }
 
   return efEventCategories;

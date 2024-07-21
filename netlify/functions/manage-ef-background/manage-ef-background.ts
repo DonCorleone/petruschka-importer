@@ -18,7 +18,9 @@ import getTickets, {
 } from '../../services/efTicketsService';
 import getEventCategories from '../../services/efCategoriesService';
 import getPresaleInfoByEventId from '../../services/efPresaleService';
-import getEventAgenda, {getAgendaFromJson} from "../../services/efAgendaService";
+import getEventAgenda, {
+  getAgendaFromJson
+} from '../../services/efAgendaService';
 
 export async function handler(event: HandlerEvent, context: HandlerContext) {
   try {
@@ -49,7 +51,7 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       const eventUi = await getEventUiById(efEvent.id);
 
       const uiProps = getPropertiesFromJson(eventUi);
-      
+
       let artists = '';
       let eventKey = '';
       let gigTag = '';
@@ -84,17 +86,15 @@ export async function handler(event: HandlerEvent, context: HandlerContext) {
       const visibility = await getVisibilityByEventId(eventDetail?.id ?? '');
 
       let categories = await getEventCategories(eventDetail?.id ?? '');
-
       // tickets defined in EF?
       const tickets = await getTickets(eventDetail?.id ?? '');
-      
       if (!categories || !categories.length) {
         categories = getCategoriesFromTicket(tickets.conditions);
       }
-      
+
       let eventUrl = 'https://eventfrog.ch' + eventDetail?.url;
-      
-      if (!categories || !categories.length){
+
+      if (!categories || !categories.length) {
         // Get TicketInfo from Description
         categories = getCategoriesFromTicket(uiProps.description);
 
