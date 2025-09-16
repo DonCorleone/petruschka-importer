@@ -1,0 +1,48 @@
+{
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "type": "npm",
+      "script": "importer:build",
+      "group": {
+        "kind": "build",
+        "isDefault": true
+      },
+      "problemMatcher": ["$tsc"],
+      "label": "npm: importer:build",
+      "detail": "Build the importer application"
+    },
+    {
+      "type": "npm",
+      "script": "importer",
+      "group": "test",
+      "problemMatcher": [],
+      "label": "npm: importer",
+      "detail": "Run the importer application with ts-node"
+    },
+    {
+      "type": "npm",
+      "script": "importer:dev",
+      "isBackground": true,
+      "problemMatcher": [
+        {
+          "pattern": [
+            {
+              "regexp": ".",
+              "file": 1,
+              "location": 2,
+              "message": 3
+            }
+          ],
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": ".",
+            "endsPattern": "."
+          }
+        }
+      ],
+      "label": "npm: importer:dev",
+      "detail": "Watch and run the importer application"
+    }
+  ]
+}

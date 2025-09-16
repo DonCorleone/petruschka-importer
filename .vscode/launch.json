@@ -2,6 +2,19 @@
     "version": "0.2.0",
     "configurations": [
       {
+        "name": "Launch via NPM",
+        "request": "launch",
+        "runtimeArgs": [
+          "run-script",
+          "debug"
+        ],
+        "runtimeExecutable": "npm",
+        "skipFiles": [
+          "<node_internals>/**"
+        ],
+        "type": "node"
+      },
+      {
         "name": "netlify dev",
         "type": "node",
         "request": "launch",
@@ -26,6 +39,27 @@
         "program": "${workspaceFolder}/node_modules/.bin/netlify",
         "args": ["functions:serve"],
         "console": "externalTerminal"
+      },
+      {
+        "name": "Debug Importer",
+        "type": "node",
+        "request": "launch",
+        "skipFiles": ["<node_internals>/**"],
+        "program": "${workspaceFolder}/src/index.ts",
+        "outFiles": ["${workspaceFolder}/dist/**/*.js"],
+        "preLaunchTask": "npm: importer:build",
+        "sourceMaps": true,
+        "console": "integratedTerminal"
+      },
+      {
+        "name": "Debug Importer (ts-node)",
+        "type": "node",
+        "request": "launch",
+        "skipFiles": ["<node_internals>/**"],
+        "runtimeArgs": ["-r", "ts-node/register"],
+        "args": ["${workspaceFolder}/src/index.ts"],
+        "console": "integratedTerminal",
+        "envFile": "${workspaceFolder}/src/.env"
       }
     ]
   }

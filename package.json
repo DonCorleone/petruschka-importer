@@ -5,10 +5,18 @@
     "start": "npm run build && node build/index.js",
     "build": "rimraf ./build && tsc",
     "lint": "eslint . --ext .ts",
-    "prettier-format": "prettier --config .prettierrc 'netlify/**/*.ts' --write"
+    "prettier-format": "prettier --config .prettierrc 'netlify/**/*.ts' --write",
+    "importer": "ts-node src/index.ts",
+    "importer:dev": "nodemon -w src -e ts,json --exec ts-node src/index.ts",
+    "importer:build": "rimraf ./dist && tsc -p tsconfig.importer.json",
+    "importer:start": "npm run importer:build && node dist/index.js",
+    "importer:tour": "ts-node src/index.ts --tour",
+    "debug:importer": "node --inspect-brk -r ts-node/register src/index.ts"
   },
   "dependencies": {
     "@netlify/functions": "^1.2.0",
+    "@types/dotenv": "^6.1.1",
+    "dotenv": "^17.2.2",
     "jspdf": "^2.5.1",
     "mongodb": "^4.9.0",
     "node-fetch": "^3.2.10",
