@@ -1,5 +1,6 @@
 import { TourDetails, TourDate, TourPrice } from '../models/visitate';
 import { EventDocument, EventInfo, TicketType, TicketTypeInfo } from '../models/mongodb';
+import { config } from '../config';
 
 export class DataMapper {
   /**
@@ -60,12 +61,12 @@ export class DataMapper {
         showLinkToGoogleMap: false,
         latitude: -1.7976931348623157e+308,
         longitude: -1.7976931348623157e+308,
-        facebookPixelId: '2025w', // As requested
+        facebookPixelId: config.customData.facebookPixelId || '2025w', // Use custom data if available
         stay22Active: true,
         isBankInternalEvent: false,
         externalEventCode: '',
         forceEmptySeats: 0,
-        eventInfos: this.createEventInfos(tourDetails),
+        eventInfos: this.createEventInfos(tourDetails, tourDate),
         ticketTypes: this.createTicketTypes(tourDetails, tourDate)
       };
 
@@ -74,30 +75,72 @@ export class DataMapper {
   }
 
   /**
+   * Constructs a ticket URL based on event ID and timestamp
+   * 
+   * @param eventId The Visitate event ID
+   * @param timestamp Unix timestamp of the event
+   * @returns URL for ticket ordering
+   */
+  private constructTicketUrl(eventId: number, timestamp: number): string {
+    // Create a date object from the timestamp
+    const eventDate = new Date(timestamp * 1000);
+    
+    // Format the date as YYYY-MM-DD
+    const dateString = eventDate.toISOString().split('T')[0];
+    
+    // Format the time as HH:MM
+    const hours = eventDate.getHours().toString().padStart(2, '0');
+    const minutes = eventDate.getMinutes().toString().padStart(2, '0');
+    const timeString = `${hours}%3A${minutes}`; // URL encoded colon (:)
+    
+    // Replace placeholders in URL template
+    return config.tickets.urlTemplate
+      .replace('{{eventId}}', eventId.toString())
+      .replace('{{date}}', dateString)
+      .replace('{{time}}', timeString);
+  }
+  
+  /**
+   * Constructs an image URL based on a template and eventId/facebookPixelId
+   * 
+   * @param template The URL template with {{eventId}} placeholder
+   * @param eventId The ID to use in the URL (usually facebookPixelId)
+   * @returns The constructed image URL
+   */
+  private constructImageUrl(template: string, eventId: string): string {
+    // Replace the eventId placeholder in the template
+    return template.replace('{{eventId}}', eventId);
+  }
+
+  /**
    * Creates event info objects from tour details
    * 
    * @param tourDetails The tour details from Visitate API
+   * @param tourDate The specific tour date
    * @returns Array of event info objects
    */
-  private createEventInfos(tourDetails: TourDetails): EventInfo[] {
+  private createEventInfos(tourDetails: TourDetails, tourDate: TourDate): EventInfo[] {
+    // Use custom venue name/location if available
+    const locationName = config.customData.location || tourDetails.venue_name;
+    
     // Just create one event info for German language (languageId = 0)
     const eventInfo: EventInfo = {
       _id: Math.floor(Math.random() * 1000000), // Generate a random ID
       organizerName: null,
       name: tourDetails.name,
-      shortDescription: tourDetails.description_short,
+      shortDescription: config.customData.shortDescription || tourDetails.description_short,
       importantNotes: '',
-      longDescription: tourDetails.description_long,
-      artists: '', // No direct mapping for artists
-      url: '', // No direct mapping for URL
-      city: tourDetails.venue_name, // Use venue name as city
-      location: tourDetails.venue_name,
+      longDescription: config.customData.longDescription || tourDetails.description_long,
+      artists: config.customData.artists || '', // Use custom artists if available
+      url: this.constructTicketUrl(tourDetails.id, tourDate.from), // Generate ticket URL using tour date
+      city: locationName, // Use venue name as city
+      location: locationName,
       address: tourDetails.meeting_point,
       postalCode: null,
-      bannerImagePath: tourDetails.image_url,
-      flyerImagePath: tourDetails.image_url,
-      bannerImage: tourDetails.image_url.split('/').pop() || '',
-      flyerImage: tourDetails.image_url.split('/').pop() || '',
+      bannerImagePath: this.constructImageUrl(config.images.bannerTemplate, config.customData.facebookPixelId || ''),
+      flyerImagePath: this.constructImageUrl(config.images.flyerTemplate, config.customData.facebookPixelId || ''),
+      bannerImage: `${config.customData.facebookPixelId || ''}.jpg`,
+      flyerImage: `${config.customData.facebookPixelId || ''}.jpg`,
       languageId: 0, // German only as requested
       languageIsoCode: null,
       googleMapLink: '',

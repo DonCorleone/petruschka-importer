@@ -15,16 +15,18 @@ const dataMapper_1 = require("./services/dataMapper");
 const mongoDbService_1 = require("./services/mongoDbService");
 /**
  * Main application function to import events from Visitate to MongoDB
+ *
+ * @param cmdLineTourId Optional tour ID from command line
  */
-function importEvents() {
+function importEvents(cmdLineTourId) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log('Starting Visitate event import...');
         const visitateService = new visitateService_1.VisitateService();
         const dataMapper = new dataMapper_1.DataMapper();
         const mongoDbService = new mongoDbService_1.MongoDbService();
         try {
-            // Get tour ID from config
-            const tourId = config_1.config.visitate.tourId;
+            // Get tour ID from command line args or config
+            const tourId = cmdLineTourId || config_1.config.visitate.tourId;
             console.log(`Fetching data for tour ID: ${tourId}`);
             // Fetch data from Visitate API
             const [tourDetails, tourDates] = yield Promise.all([
@@ -36,15 +38,28 @@ function importEvents() {
             // Map data to MongoDB format
             const eventDocuments = dataMapper.mapToMongoDocument(tourDetails, tourDates);
             console.log(`Mapped ${eventDocuments.length} event documents`);
+            // Find and log the premiere event
+            const premiereEvent = eventDocuments.find(event => event.googleAnalyticsTracker === 'Premiere');
+            if (premiereEvent) {
+                console.log(`\nPremiere event detected on: ${premiereEvent.start.toLocaleDateString()} at ${premiereEvent.start.toLocaleTimeString()}`);
+            }
+            else {
+                console.log('\nNo premiere event detected');
+            }
             if (config_1.config.mongodb.skipMongoDB) {
                 console.log('\nSkipping MongoDB storage as SKIP_MONGODB=true');
                 console.log('\nFirst event document sample:');
                 console.log(JSON.stringify(eventDocuments[0], null, 2).substring(0, 500) + '...');
+                // Show the EventInfo with ticket URL
+                console.log('\nEvent Info with Ticket URL:');
+                console.log(JSON.stringify(eventDocuments[0].eventInfos, null, 2));
                 console.log('\nImport simulation completed successfully!');
                 return;
             }
             // Connect to MongoDB
             yield mongoDbService.connect(config_1.config.mongodb.connectionString, config_1.config.mongodb.dbName);
+            // Skip clearing events - will be done manually in MongoDB Atlas
+            console.log('Skipping event clearing - will be done manually in MongoDB Atlas');
             // Save events to MongoDB
             const savedIds = yield mongoDbService.saveEvents(eventDocuments);
             console.log(`Saved ${savedIds.length} events to MongoDB`);
@@ -62,8 +77,28 @@ function importEvents() {
         }
     });
 }
+/**
+ * Parse command-line arguments for tour ID
+ *
+ * @returns Tour ID if provided, otherwise undefined
+ */
+function parseTourId() {
+    // Check for --tour or -t argument
+    const args = process.argv.slice(2);
+    for (let i = 0; i < args.length; i++) {
+        if ((args[i] === '--tour' || args[i] === '-t') && i + 1 < args.length) {
+            const tourId = parseInt(args[i + 1], 10);
+            if (!isNaN(tourId)) {
+                return tourId;
+            }
+        }
+    }
+    return undefined;
+}
+// Parse command-line arguments
+const tourId = parseTourId();
 // Run the import
-importEvents().catch(error => {
+importEvents(tourId).catch(error => {
     console.error('Unhandled error:', error);
     process.exit(1);
 });

@@ -1,0 +1,260 @@
+[
+  {
+    $sort: {
+      start: 1
+    }
+  },
+  {
+    $addFields: {
+      rootGoogleAnalyticsTracker:
+        "$googleAnalyticsTracker"
+    }
+  },
+  {
+    $unwind: "$eventInfos"
+  },
+  {
+    $match: {
+      "eventInfos.languageId": 0
+    }
+  },
+  {
+    $group: {
+      _id: "$facebookPixelId",
+      name: {
+        $first: "$eventInfos.name"
+      },
+      imageUrl: {
+        $first: "$eventInfos.imageUrl"
+      },
+      flyerImagePath: {
+        $first: "$eventInfos.flyerImagePath"
+      },
+      bannerImagePath: {
+        $first: "$eventInfos.bannerImagePath"
+      },
+      location: {
+        $first: "$eventInfos.location"
+      },
+      url: {
+        $first: "$eventInfos.url"
+      },
+      artists: {
+        $first: {
+          $ifNull: [
+            "$eventInfos.artists",
+            "$eventInfos.artist"
+          ]
+        }
+      },
+      importantNotes: {
+        $first: "$eventInfos.importantNotes"
+      },
+      shortDescription: {
+        $first: "$eventInfos.shortDescription"
+      },
+      longDescription: {
+        $first: "$eventInfos.longDescription"
+      },
+      googleAnalyticsTracker: {
+        $first: "$rootGoogleAnalyticsTracker"
+      },
+      premiereDate: {
+        $first: "$start"
+      },
+      notificationEmail: {
+        $first: "$notificationEmail"
+      },
+      allTickets: {
+        $push: {
+          $map: {
+            input: {
+              $filter: {
+                input: "$ticketTypes",
+                as: "ticketType",
+                cond: {
+                  $gt: [
+                    {
+                      $size: {
+                        $filter: {
+                          input:
+                            "$$ticketType.ticketTypeInfos",
+                          as: "info",
+                          cond: {
+                            $eq: [
+                              "$$info.languageId",
+                              0
+                            ]
+                          }
+                        }
+                      }
+                    },
+                    0
+                  ]
+                }
+              }
+            },
+            as: "ticket",
+            in: {
+              price: "$$ticket.price",
+              currency: "$$ticket.currency",
+              name: {
+                $arrayElemAt: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input:
+                            "$$ticket.ticketTypeInfos",
+                          as: "info",
+                          cond: {
+                            $eq: [
+                              "$$info.languageId",
+                              0
+                            ]
+                          }
+                        }
+                      },
+                      as: "info",
+                      in: "$$info.name"
+                    }
+                  },
+                  0
+                ]
+              },
+              imageUrl: {
+                $arrayElemAt: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input:
+                            "$$ticket.ticketTypeInfos",
+                          as: "info",
+                          cond: {
+                            $eq: [
+                              "$$info.languageId",
+                              0
+                            ]
+                          }
+                        }
+                      },
+                      as: "info",
+                      in: "$$info.imageUrl"
+                    }
+                  },
+                  0
+                ]
+              },
+              description: {
+                $arrayElemAt: [
+                  {
+                    $map: {
+                      input: {
+                        $filter: {
+                          input:
+                            "$$ticket.ticketTypeInfos",
+                          as: "info",
+                          cond: {
+                            $eq: [
+                              "$$info.languageId",
+                              0
+                            ]
+                          }
+                        }
+                      },
+                      as: "info",
+                      in: "$$info.description"
+                    }
+                  },
+                  0
+                ]
+              }
+            }
+          }
+        }
+      },
+      eventDates: {
+        $push: {
+          start: "$start",
+          end: "$end",
+          eventDateString: "$eventDateString",
+          googleAnalyticsTracker:
+            "$googleAnalyticsTracker"
+        }
+      }
+    }
+  },
+  {
+    $addFields: {
+      ticketDetails: {
+        $reduce: {
+          input: {
+            $setUnion: [
+              {
+                $reduce: {
+                  input: "$allTickets",
+                  initialValue: [],
+                  in: {
+                    $concatArrays: [
+                      "$$value",
+                      "$$this"
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          initialValue: [],
+          in: {
+            $cond: {
+              if: {
+                $in: [
+                  "$$this.name",
+                  {
+                    $map: {
+                      input: "$$value",
+                      as: "existing",
+                      in: "$$existing.name"
+                    }
+                  }
+                ]
+              },
+              then: "$$value",
+              else: {
+                $concatArrays: [
+                  "$$value",
+                  ["$$this"]
+                ]
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  {
+    $sort: {
+      _id: -1
+    }
+  },
+  {
+    $project: {
+      name: 1,
+      imageUrl: 1,
+      flyerImagePath: 1,
+      bannerImagePath: 1,
+      location: 1,
+      url: 1,
+      artists: 1,
+      importantNotes: 1,
+      shortDescription: 1,
+      longDescription: 1,
+      googleAnalyticsTracker: 1,
+      premiereDate: 1,
+      notificationEmail: 1,
+      ticketDetails: 1,
+      eventDates: 1
+    }
+  }
+]

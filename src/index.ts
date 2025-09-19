@@ -45,6 +45,11 @@ async function importEvents(cmdLineTourId?: number) {
       console.log('\nSkipping MongoDB storage as SKIP_MONGODB=true');
       console.log('\nFirst event document sample:');
       console.log(JSON.stringify(eventDocuments[0], null, 2).substring(0, 500) + '...');
+      
+      // Show the EventInfo with ticket URL
+      console.log('\nEvent Info with Ticket URL:');
+      console.log(JSON.stringify(eventDocuments[0].eventInfos, null, 2));
+      
       console.log('\nImport simulation completed successfully!');
       return;
     }

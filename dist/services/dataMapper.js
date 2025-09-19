@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.DataMapper = void 0;
+const config_1 = require("../config");
 class DataMapper {
     /**
      * Maps data from Visitate API to MongoDB document format
@@ -10,9 +11,13 @@ class DataMapper {
      * @returns MongoDB event document
      */
     mapToMongoDocument(tourDetails, tourDates) {
+        // Sort tour dates by date (ascending) to find the first upcoming event
+        const sortedTourDates = [...tourDates].sort((a, b) => a.from - b.from);
+        const firstUpcomingEventId = sortedTourDates.length > 0 ? sortedTourDates[0].id : null;
         // Create an array of event documents, one for each tour date
         return tourDates.map(tourDate => {
             const eventId = tourDate.id;
+            const isPremiere = eventId === firstUpcomingEventId;
             // Create base event document
             const eventDocument = {
                 _id: eventId,
@@ -28,7 +33,7 @@ class DataMapper {
                 eventGenreValue: 145,
                 googleCoordinates: '',
                 isActiveForSale: true,
-                googleAnalyticsTracker: tourDetails.name,
+                googleAnalyticsTracker: isPremiere ? 'Premiere' : tourDetails.name,
                 hideOnEventList: false,
                 hideEventInfoOnSoldOut: false,
                 dateCreated: new Date(),
@@ -44,7 +49,7 @@ class DataMapper {
                 noVatOnCommission: false,
                 shippingFee: 0,
                 sendNotificationByEmail: true,
-                notificationEmail: '',
+                notificationEmail: this.extractEmailFromDescription(tourDetails.description_long) || 'info@petruschka.ch',
                 vatNumber: '',
                 sendWarning: false,
                 salesWarningLevel: 0,
@@ -54,42 +59,78 @@ class DataMapper {
                 showLinkToGoogleMap: false,
                 latitude: -1.7976931348623157e+308,
                 longitude: -1.7976931348623157e+308,
-                facebookPixelId: '2025w',
+                facebookPixelId: config_1.config.customData.facebookPixelId || '2025w',
                 stay22Active: true,
                 isBankInternalEvent: false,
                 externalEventCode: '',
                 forceEmptySeats: 0,
-                eventInfos: this.createEventInfos(tourDetails),
+                eventInfos: this.createEventInfos(tourDetails, tourDate),
                 ticketTypes: this.createTicketTypes(tourDetails, tourDate)
             };
             return eventDocument;
         });
     }
     /**
+     * Constructs a ticket URL based on event ID and timestamp
+     *
+     * @param eventId The Visitate event ID
+     * @param timestamp Unix timestamp of the event
+     * @returns URL for ticket ordering
+     */
+    constructTicketUrl(eventId, timestamp) {
+        // Create a date object from the timestamp
+        const eventDate = new Date(timestamp * 1000);
+        // Format the date as YYYY-MM-DD
+        const dateString = eventDate.toISOString().split('T')[0];
+        // Format the time as HH:MM
+        const hours = eventDate.getHours().toString().padStart(2, '0');
+        const minutes = eventDate.getMinutes().toString().padStart(2, '0');
+        const timeString = `${hours}%3A${minutes}`; // URL encoded colon (:)
+        // Replace placeholders in URL template
+        return config_1.config.tickets.urlTemplate
+            .replace('{{eventId}}', eventId.toString())
+            .replace('{{date}}', dateString)
+            .replace('{{time}}', timeString);
+    }
+    /**
+     * Constructs an image URL based on a template and eventId/facebookPixelId
+     *
+     * @param template The URL template with {{eventId}} placeholder
+     * @param eventId The ID to use in the URL (usually facebookPixelId)
+     * @returns The constructed image URL
+     */
+    constructImageUrl(template, eventId) {
+        // Replace the eventId placeholder in the template
+        return template.replace('{{eventId}}', eventId);
+    }
+    /**
      * Creates event info objects from tour details
      *
      * @param tourDetails The tour details from Visitate API
+     * @param tourDate The specific tour date
      * @returns Array of event info objects
      */
-    createEventInfos(tourDetails) {
+    createEventInfos(tourDetails, tourDate) {
+        // Use custom venue name/location if available
+        const locationName = config_1.config.customData.location || tourDetails.venue_name;
         // Just create one event info for German language (languageId = 0)
         const eventInfo = {
             _id: Math.floor(Math.random() * 1000000),
             organizerName: null,
             name: tourDetails.name,
-            shortDescription: tourDetails.description_short,
+            shortDescription: config_1.config.customData.shortDescription || tourDetails.description_short,
             importantNotes: '',
-            longDescription: tourDetails.description_long,
-            artists: '',
-            url: '',
-            city: tourDetails.venue_name,
-            location: tourDetails.venue_name,
+            longDescription: config_1.config.customData.longDescription || tourDetails.description_long,
+            artists: config_1.config.customData.artists || '',
+            url: this.constructTicketUrl(tourDetails.id, tourDate.from),
+            city: locationName,
+            location: locationName,
             address: tourDetails.meeting_point,
             postalCode: null,
-            bannerImagePath: tourDetails.image_url,
-            flyerImagePath: tourDetails.image_url,
-            bannerImage: tourDetails.image_url.split('/').pop() || '',
-            flyerImage: tourDetails.image_url.split('/').pop() || '',
+            bannerImagePath: this.constructImageUrl(config_1.config.images.bannerTemplate, config_1.config.customData.facebookPixelId || ''),
+            flyerImagePath: this.constructImageUrl(config_1.config.images.flyerTemplate, config_1.config.customData.facebookPixelId || ''),
+            bannerImage: `${config_1.config.customData.facebookPixelId || ''}.jpg`,
+            flyerImage: `${config_1.config.customData.facebookPixelId || ''}.jpg`,
             languageId: 0,
             languageIsoCode: null,
             googleMapLink: '',
@@ -185,6 +226,27 @@ class DataMapper {
      * @param ticketTypeId The parent ticket type ID
      * @returns Array of ticket type info objects
      */
+    /**
+     * Extracts an email address from HTML description
+     *
+     * @param description HTML description text
+     * @returns Email address if found, otherwise null
+     */
+    extractEmailFromDescription(description) {
+        // Look for email pattern in an href="mailto:" link
+        const mailtoRegex = /href="mailto:([^"]+)"/i;
+        const mailtoMatch = description.match(mailtoRegex);
+        if (mailtoMatch && mailtoMatch[1]) {
+            return mailtoMatch[1];
+        }
+        // Look for a standard email pattern as fallback
+        const emailRegex = /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/g;
+        const emailMatches = description.match(emailRegex);
+        if (emailMatches && emailMatches.length > 0) {
+            return emailMatches[0];
+        }
+        return null;
+    }
     createTicketTypeInfos(price, ticketTypeId) {
         // Just create one ticket type info for German language (languageId = 0)
         const ticketTypeInfo = {

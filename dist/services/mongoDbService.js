@@ -45,6 +45,24 @@ class MongoDbService {
         });
     }
     /**
+     * Clears all events from the collection
+     */
+    clearEvents() {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (!this.eventsCollection) {
+                throw new Error('MongoDB is not connected');
+            }
+            try {
+                const result = yield this.eventsCollection.deleteMany({});
+                console.log(`Cleared ${result.deletedCount} events from collection`);
+            }
+            catch (error) {
+                console.error('Error clearing events from MongoDB:', error);
+                throw new Error('Failed to clear events from MongoDB');
+            }
+        });
+    }
+    /**
      * Saves event documents to MongoDB
      *
      * @param events Array of event documents to save
@@ -60,15 +78,15 @@ class MongoDbService {
                 // Insert events one by one to handle individual errors
                 for (const event of events) {
                     try {
-                        // Check if event with this ID already exists
-                        const existingEvent = yield this.eventsCollection.findOne({ _id: event._id });
-                        if (existingEvent) {
-                            // Update existing event
+                        // First check if the event already exists
+                        const existing = yield this.eventsCollection.findOne({ _id: event._id });
+                        if (existing) {
+                            // Replace the existing document
                             yield this.eventsCollection.replaceOne({ _id: event._id }, event);
-                            console.log(`Updated event with ID ${event._id}`);
+                            console.log(`Updated existing event with ID ${event._id}`);
                         }
                         else {
-                            // Insert new event
+                            // Insert new document
                             yield this.eventsCollection.insertOne(event);
                             console.log(`Inserted new event with ID ${event._id}`);
                         }
